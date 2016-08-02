@@ -1,6 +1,6 @@
 {
   "name": "egg-multipart",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "multipart plugin for egg",
   "main": "index.js",
   "scripts": {
