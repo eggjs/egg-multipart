@@ -3,7 +3,7 @@
 const path = require('path');
 const fs = require('fs');
 
-module.exports = function*() {
+module.exports = function* () {
   const parts = this.multipart();
   let part;
   while ((part = yield parts) != null) {

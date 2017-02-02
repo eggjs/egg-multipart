@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const sendToWormhole = require('stream-wormhole');
 
-module.exports = function*() {
+module.exports = function* () {
   const parts = this.multipart();
   let part;
   while ((part = yield parts) != null) {

@@ -18,7 +18,7 @@ module.exports = app => {
     },
   };
 
-  app.get('/', function*() {
+  app.get('/', function* () {
     this.body = {
       app: is.object(this.app.oss),
       ctx: is.object(this.oss),
@@ -26,18 +26,18 @@ module.exports = app => {
     };
   });
 
-  app.get('/uploadtest', function*() {
+  app.get('/uploadtest', function* () {
     const name = 'chair-oss-test-upload-' + process.version + '-' + Date.now();
     this.body = yield this.oss.put(name, fs.createReadStream(__filename));
   });
 
-  app.get('/upload', function*() {
+  app.get('/upload', function* () {
     this.set('x-csrf', this.csrf);
     this.body = 'hi';
     // yield this.render('upload.html');
   });
 
-  app.post('/upload', function*() {
+  app.post('/upload', function* () {
     const stream = yield this.getFileStream();
     const name = 'chair-multipart-test/' + process.version + '-' + Date.now() + '-' + path.basename(stream.filename);
     // 文件处理，上传到云存储等等
