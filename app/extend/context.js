@@ -34,7 +34,7 @@ module.exports = {
    */
   * getFileStream() {
     const parts = this.multipart({ autoFields: true });
-    let stream = yield parts;
+    const stream = yield parts;
     // 文件不存在，当做错误请求处理
     if (!stream || !stream.filename) {
       this.throw(400, 'Can\'t found upload file');
