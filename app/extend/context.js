@@ -9,7 +9,6 @@ module.exports = {
    * @method Context#multipart
    * @param {Object} [options] - override default multipart configurations
    * @return {Yieldable} parts
-   * @since 0.10.0
    */
   multipart(options) {
     // multipart/form-data
