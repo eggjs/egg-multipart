@@ -264,6 +264,26 @@ describe('test/multipart.test.js', () => {
       assert(data.url.includes('http://mockoss.com/chair-multipart-test/'));
     });
 
+    it('should handle one upload file in simple way with async function controller', function* () {
+      const form = formstream();
+      form.file('file', __filename);
+
+      const headers = form.headers();
+      const url = host + '/upload/async';
+      const res = yield urllib.request(url, {
+        method: 'POST',
+        headers,
+        stream: form,
+        dataType: 'json',
+      });
+
+      const data = res.data;
+      assert.deepEqual(data.fields, {});
+      assert(data.status === 200);
+      assert(typeof data.name === 'string');
+      assert(data.url.includes('http://mockoss.com/chair-multipart-test/'));
+    });
+
     it('should handle one upload file and all fields', function* () {
       const form = formstream();
       form.field('f1', 'f1-value');

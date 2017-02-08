@@ -1,14 +1,14 @@
 'use strict';
 
 const parse = require('co-busboy');
+const co = require('co');
 
 module.exports = {
   /**
-   * 创建 multipart parts 对象，可以分开获取上传数据
+   * create multipart.parts instance, to get separated files.
    * @method Context#multipart
-   * @param {Object} [options] - 允许覆盖默认的 multipart 配置
+   * @param {Object} [options] - override default multipart configurations
    * @return {Yieldable} parts
-   * @since 0.10.0
    */
   multipart(options) {
     // multipart/form-data
@@ -21,25 +21,28 @@ module.exports = {
   },
 
   /**
-   * 获取上传文件流
+   * get upload file stream
    * @example
    * ```js
    * const stream = yield this.getFileStream();
-   * // 获取所有其他表单字段
+   * // get other fields
    * console.log(stream.fields);
    * ```
    * @method Context#getFileStream
    * @return {ReadStream} stream
    * @since 1.0.0
    */
-  * getFileStream() {
-    const parts = this.multipart({ autoFields: true });
-    const stream = yield parts;
-    // 文件不存在，当做错误请求处理
-    if (!stream || !stream.filename) {
-      this.throw(400, 'Can\'t found upload file');
-    }
-    stream.fields = parts.field;
-    return stream;
+  getFileStream() {
+    const ctx = this;
+    return co(function* () {
+      const parts = ctx.multipart({ autoFields: true });
+      const stream = yield parts;
+      // stream not exists, treat as an exception
+      if (!stream || !stream.filename) {
+        ctx.throw(400, 'Can\'t found upload file');
+      }
+      stream.fields = parts.field;
+      return stream;
+    });
   },
 };
