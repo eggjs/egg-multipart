@@ -7,14 +7,16 @@ const is = require('is-type-of');
 module.exports = app => {
   // mock oss
   app.context.oss = {
-    * put(name) {
-      return {
-        name,
-        url: 'http://mockoss.com/' + name,
-        res: {
-          status: 200,
-        },
-      };
+    put(name) {
+      return new Promise(resolve => {
+        resolve({
+          name,
+          url: 'http://mockoss.com/' + name,
+          res: {
+            status: 200,
+          },
+        });
+      });
     },
   };
 
@@ -49,4 +51,6 @@ module.exports = app => {
       fields: stream.fields,
     };
   });
+
+  app.post('/upload/async', 'async.async');
 };

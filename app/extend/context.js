@@ -1,6 +1,7 @@
 'use strict';
 
 const parse = require('co-busboy');
+const co = require('co');
 
 module.exports = {
   /**
@@ -32,14 +33,17 @@ module.exports = {
    * @return {ReadStream} stream
    * @since 1.0.0
    */
-  * getFileStream() {
-    const parts = this.multipart({ autoFields: true });
-    const stream = yield parts;
-    // 文件不存在，当做错误请求处理
-    if (!stream || !stream.filename) {
-      this.throw(400, 'Can\'t found upload file');
-    }
-    stream.fields = parts.field;
-    return stream;
+  getFileStream() {
+    const ctx = this;
+    return co(function* () {
+      const parts = ctx.multipart({ autoFields: true });
+      const stream = yield parts;
+      // 文件不存在，当做错误请求处理
+      if (!stream || !stream.filename) {
+        ctx.throw(400, 'Can\'t found upload file');
+      }
+      stream.fields = parts.field;
+      return stream;
+    });
   },
 };
