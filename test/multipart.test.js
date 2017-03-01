@@ -246,6 +246,7 @@ describe('test/multipart.test.js', () => {
 
     it('should handle one upload file in simple way', function* () {
       const form = formstream();
+      form.field('foo', 'bar').field('[', 'toString').field(']', 'toString');
       form.file('file', __filename);
 
       const headers = form.headers();
@@ -258,7 +259,11 @@ describe('test/multipart.test.js', () => {
       });
 
       const data = res.data;
-      assert.deepEqual(data.fields, {});
+      assert.deepEqual(data.fields, {
+        '[': 'toString',
+        ']': 'toString',
+        foo: 'bar',
+      });
       assert(data.status === 200);
       assert(typeof data.name === 'string');
       assert(data.url.includes('http://mockoss.com/chair-multipart-test/'));
