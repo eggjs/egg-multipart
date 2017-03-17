@@ -4,10 +4,11 @@ const assert = require('assert');
 const request = require('supertest');
 const formstream = require('formstream');
 const urllib = require('urllib');
+const path = require('path');
+const fs = require('fs');
 const mock = require('egg-mock');
 
 describe('test/multipart.test.js', () => {
-
   describe('multipart', () => {
     let app;
     let server;
@@ -266,7 +267,7 @@ describe('test/multipart.test.js', () => {
       });
       assert(data.status === 200);
       assert(typeof data.name === 'string');
-      assert(data.url.includes('http://mockoss.com/chair-multipart-test/'));
+      assert(data.url.includes('http://mockoss.com/egg-multipart-test/'));
     });
 
     it('should handle one upload file in simple way with async function controller', function* () {
@@ -286,7 +287,7 @@ describe('test/multipart.test.js', () => {
       assert.deepEqual(data.fields, {});
       assert(data.status === 200);
       assert(typeof data.name === 'string');
-      assert(data.url.includes('http://mockoss.com/chair-multipart-test/'));
+      assert(data.url.includes('http://mockoss.com/egg-multipart-test/'));
     });
 
     it('should handle one upload file and all fields', function* () {
@@ -308,7 +309,7 @@ describe('test/multipart.test.js', () => {
       const data = res.data;
       assert(data.status === 200);
       assert(typeof data.name === 'string');
-      assert(data.url.includes('http://mockoss.com/chair-multipart-test/'));
+      assert(data.url.includes('http://mockoss.com/egg-multipart-test/'));
       assert.deepEqual(data.fields, {
         f1: 'f1-value',
         f2: 'f2-value-中文',
@@ -343,6 +344,53 @@ describe('test/multipart.test.js', () => {
       });
       assert(res.status === 400);
       assert(res.data.toString().includes('Can&#39;t found upload file'));
+    });
+  });
+
+  describe('upload over fileSize limit', () => {
+    let app;
+    let server;
+    let host;
+    const bigfile = path.join(__dirname, 'big.js');
+    before(() => {
+      app = mock.app({
+        baseDir: 'apps/upload-limit',
+      });
+      return app.ready();
+    });
+    before(function* () {
+      fs.writeFileSync(bigfile, new Buffer(1024 * 1024 * 2));
+      server = app.listen();
+      host = 'http://127.0.0.1:' + server.address().port;
+      yield request(server)
+        .get('/upload')
+        .expect(200);
+    });
+    after(() => {
+      fs.unlinkSync(bigfile);
+      server.close();
+      return app.close();
+    });
+    beforeEach(() => app.mockCsrf());
+    afterEach(mock.restore);
+
+    it('should show error', function* () {
+      const form = formstream();
+      form.field('foo', 'bar').field('[', 'toString').field(']', 'toString');
+      form.file('file', bigfile);
+
+      const headers = form.headers();
+      const url = host + '/upload';
+      const res = yield urllib.request(url, {
+        method: 'POST',
+        headers,
+        stream: form,
+        dataType: 'json',
+      });
+
+      const data = res.data;
+      assert(res.status === 413);
+      assert(data.message === 'Request file too large');
     });
   });
 });

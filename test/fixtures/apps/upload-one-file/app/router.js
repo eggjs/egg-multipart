@@ -29,7 +29,7 @@ module.exports = app => {
   });
 
   app.get('/uploadtest', function* () {
-    const name = 'chair-oss-test-upload-' + process.version + '-' + Date.now();
+    const name = 'egg-oss-test-upload-' + process.version + '-' + Date.now();
     this.body = yield this.oss.put(name, fs.createReadStream(__filename));
   });
 
@@ -41,7 +41,7 @@ module.exports = app => {
 
   app.post('/upload', function* () {
     const stream = yield this.getFileStream();
-    const name = 'chair-multipart-test/' + process.version + '-' + Date.now() + '-' + path.basename(stream.filename);
+    const name = 'egg-multipart-test/' + process.version + '-' + Date.now() + '-' + path.basename(stream.filename);
     // 文件处理，上传到云存储等等
     const result = yield this.oss.put(name, stream);
     this.body = {

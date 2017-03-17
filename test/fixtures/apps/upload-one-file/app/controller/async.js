@@ -18,7 +18,7 @@ module.exports = app => {
       const ctx = this.ctx;
       return __awaiter(this, void 0, void 0, function* () {
         const stream = yield ctx.getFileStream();
-        const name = 'chair-multipart-test/' + process.version + '-' + Date.now() + '-' + path.basename(stream.filename);
+        const name = 'egg-multipart-test/' + process.version + '-' + Date.now() + '-' + path.basename(stream.filename);
         const result = yield ctx.oss.put(name, stream);
         ctx.body = {
           name: result.name,
