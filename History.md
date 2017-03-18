@@ -1,4 +1,10 @@
 
+1.2.0 / 2017-03-18
+==================
+
+  * feat: should emit stream error event when file too large (#5)
+  * deps: upgrade all dev deps (#4)
+
 1.1.0 / 2017-02-08
 ==================
 
