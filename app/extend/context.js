@@ -42,6 +42,21 @@ module.exports = {
         ctx.throw(400, 'Can\'t found upload file');
       }
       stream.fields = parts.field;
+      stream.once('limit', () => {
+        const err = new Error('Request file too large');
+        err.name = 'MultipartFileTooLargeError';
+        err.status = 413;
+        err.fields = stream.fields;
+        if (stream.listenerCount('error') > 0) {
+          stream.emit('error', err);
+        } else {
+          ctx.coreLogger.error(err);
+          // ignore next error event
+          stream.on('error', () => {});
+        }
+        // ignore all data
+        stream.resume();
+      });
       return stream;
     });
   },
