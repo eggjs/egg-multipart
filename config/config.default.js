@@ -11,7 +11,7 @@
  * @property {Integer} fields - Max number of non-file fields, default is `10`
  * @property {String|Integer} fileSize - Max file size (in bytes), default is `10mb`
  * @property {Integer} files - Max number of file fields, default is `10`
- * @property {Array} whitelist - The white ext file names, default is `null`
+ * @property {Array|Function} whitelist - The white ext file names, default is `null`
  * @property {Array} fileExtensions - Add more ext file names to the `whitelist`, default is `[]`
  */
 exports.multipart = {

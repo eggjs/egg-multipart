@@ -12,37 +12,40 @@ module.exports = app => {
     }
   }
 
-  // default extname whitelist
-  let whitelist = [
-    // images
-    '.jpg', '.jpeg', // image/jpeg
-    '.png', // image/png, image/x-png
-    '.gif', // image/gif
-    '.bmp', // image/bmp
-    '.wbmp', // image/vnd.wap.wbmp
-    '.webp',
-    '.tif',
-    '.psd',
-    // text
-    '.svg',
-    '.js', '.jsx',
-    '.json',
-    '.css', '.less',
-    '.html', '.htm',
-    '.xml',
-    // tar
-    '.zip',
-    '.gz', '.tgz', '.gzip',
-    // video
-    '.mp3',
-    '.mp4',
-    '.avi',
-  ];
+  let checkExt;
+  if (typeof options.whitelist === 'function') {
+    checkExt = options.whitelist;
+  } else if (Array.isArray(options.whitelist)) {
+    checkExt = filename => options.whitelist.includes(path.extname(filename) || '');
+  } else {
+    // default extname whitelist
+    const whitelist = [
+      // images
+      '.jpg', '.jpeg', // image/jpeg
+      '.png', // image/png, image/x-png
+      '.gif', // image/gif
+      '.bmp', // image/bmp
+      '.wbmp', // image/vnd.wap.wbmp
+      '.webp',
+      '.tif',
+      '.psd',
+      // text
+      '.svg',
+      '.js', '.jsx',
+      '.json',
+      '.css', '.less',
+      '.html', '.htm',
+      '.xml',
+      // tar
+      '.zip',
+      '.gz', '.tgz', '.gzip',
+      // video
+      '.mp3',
+      '.mp4',
+      '.avi',
+    ].concat(options.fileExtensions || []);
 
-  if (options.whitelist) {
-    whitelist = options.whitelist;
-  } else if (options.fileExtensions.length > 0) {
-    whitelist = whitelist.concat(options.fileExtensions);
+    checkExt = filename => whitelist.includes(path.extname(filename) || '');
   }
 
   // https://github.com/mscdex/busboy#busboy-methods
@@ -61,9 +64,13 @@ module.exports = app => {
       // just ignore, if no file
       if (!fileStream || !filename) return null;
 
-      const extname = path.extname(filename);
-      if (!extname || whitelist.indexOf(extname.toLowerCase()) === -1) {
-        const err = new Error('Invalid filename extension: ' + extname);
+      try {
+        if (!checkExt(filename)) {
+          const err = new Error('Invalid filename: ' + filename);
+          err.status = 400;
+          return err;
+        }
+      } catch (err) {
         err.status = 400;
         return err;
       }

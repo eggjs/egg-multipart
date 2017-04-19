@@ -20,19 +20,18 @@
 [download-image]: https://img.shields.io/npm/dm/egg-multipart.svg?style=flat-square
 [download-url]: https://npmjs.org/package/egg-multipart
 
-通过内置 [multipart](https://github.com/cojs/multipart) 实现了文件流式上传，
-能做到请求文件数据不落地本地磁盘即可完成处理。
+Use [co-busboy](https://github.com/cojs/busboy) to upload file by streaming and process it without save to disk.
 
-在应用中通过 `this.multipart()` 拿到文件流，直接传给图片处理模块 gm 或者直接上传到云存储 tfs 和 oss 都是可以实现的。
+Just use `ctx.multipart()` to got file stream, then pass to image processing liberary such as `gm` or upload to cloud storage such as `oss`.
 
-## 文件扩展名白名单
+## Whitelist of file extendtions
 
-出于安全考虑，上传不在白名单内的文件，会直接被拦截并以 `400 Bad request` 响应返回。
+For security, if uploading file extendtion is not in white list, will response as `400 Bad request`.
 
-默认的文件扩展名白名单如下：
+Default Whitelist:
 
 ```js
-var whitelist = [
+const whitelist = [
   // images
   '.jpg', '.jpeg', // image/jpeg
   '.png', // image/png, image/x-png
@@ -59,12 +58,14 @@ var whitelist = [
 ];
 ```
 
-### 扩展名
+### Custom Config
 
-开发者可以根据应用需求，增加额外的文件扩展名，通过在 `config.default.js` 中配置：
+Developer can custom additional file extentions:
 
 ```js
+// config/config.default.js
 exports.multipart = {
+  // will append to whilelist
   fileExtensions: [
     '.foo',
     '.apk',
@@ -72,9 +73,10 @@ exports.multipart = {
 };
 ```
 
-也可以选择__覆盖__内置的 whitelist 列表，例如只允许上传 png 图片：
+Can also **override** built-in whitelist, such as only allow png:
 
 ```js
+// config/config.default.js
 exports.multipart = {
   whitelist: [
     '.png',
@@ -82,70 +84,76 @@ exports.multipart = {
 };
 ```
 
-__注意，当传递了 `whitelist` 参数的时候 `fileExtensions` 参数失效。__
+Or by function：
 
-## 使用示例
+```js
+exports.multipart = {
+  whitelist: (filename) => [ '.png' ].includes(path.extname(filename) || '')
+};
+```
 
-### 上传一个文件
+**Note: if define `whitelist`, then `fileExtensions` will be ignored.**
 
-通过 `ctx.getFileStream*()` 接口能获取到上传的文件流。
+## Examples
 
-浏览器端 html 代码:
+### Upload File
+
+You can got upload stream by `ctx.getFileStream*()`.
 
 ```html
 <form method="POST" action="/upload?_csrf={{ ctx.csrf | safe }}" enctype="multipart/form-data">
   title: <input name="title" />
   file: <input name="file" type="file" />
-  <button type="submit">上传</button>
+  <button type="submit">Upload</button>
 </form>
 ```
 
-服务端 controller 代码: `POST /upload`
+Controller which hanlder `POST /upload`:
 
 ```js
+// app/controller/upload.js
 const path = require('path');
 const sendToWormhole = require('stream-wormhole');
 
-module.exports = function*() {
-  const stream = yield this.getFileStream();
+module.exports = function* (ctx) {
+  const stream = yield ctx.getFileStream();
   const name = 'egg-multipart-test/' + path.basename(stream.filename);
-  // 文件处理，上传到云存储等等
   let result;
   try {
-    result = yield this.oss.put(name, stream);
+    // process file or upload to cloud storage
+    result = yield ctx.oss.put(name, stream);
   } catch (err) {
-    // 必须将上传的文件流消费掉，要不然浏览器响应会卡死
+    // must consume the stream, otherwise browser will be stuck.
     yield sendToWormhole(stream);
     throw err;
   }
 
-  this.body = {
+  ctx.body = {
     url: result.url,
-    // 所有表单字段都能通过 `stream.fields` 获取到
+    // process form fields by `stream.fields`
     fields: stream.fields,
   };
 };
 ```
 
-### 上传多个文件
-
-浏览器端 html 代码:
+### Upload Multiple Files
 
 ```html
 <form method="POST" action="/upload?_csrf={{ ctx.csrf | safe }}" enctype="multipart/form-data">
   title: <input name="title" />
   file: <input name="file" type="file" />
-  <button type="submit">上传</button>
+  <button type="submit">Upload</button>
 </form>
 ```
 
-服务端 controller 代码: `POST /upload`
+Controller which hanlder `POST /upload`:
 
 ```js
+// app/controller/upload.js
 const sendToWormhole = require('stream-wormhole');
 
-module.exports = function*() {
-  const parts = this.multipart();
+module.exports = function* (ctx) {
+  const parts = ctx.multipart();
   let part;
   while ((part = yield parts) != null) {
     if (part.length) {
@@ -156,8 +164,9 @@ module.exports = function*() {
       console.log('fieldnameTruncated: ' + part[3]);
     } else {
       if (!part.filename) {
-        // 这时是用户没有选择文件就点击了上传(part 是 file stream，但是 part.filename 为空)
-        // 需要做出处理，例如给出错误提示消息
+        // user click `upload` before choose a file,
+        // `part` will be file stream, but `part.filename` is empty
+        // must handler this, such as log error.
         return;
       }
       // otherwise, it's a stream
@@ -165,12 +174,10 @@ module.exports = function*() {
       console.log('filename: ' + part.filename);
       console.log('encoding: ' + part.encoding);
       console.log('mime: ' + part.mime);
-      // 文件处理，上传到云存储等等
       let result;
       try {
-        result = yield this.oss.put('egg-multipart-test/' + part.filename, part);
+        result = yield ctx.oss.put('egg-multipart-test/' + part.filename, part);
       } catch (err) {
-        // 必须将上传的文件流消费掉，要不然浏览器响应会卡死
         yield sendToWormhole(stream);
         throw err;
       }
