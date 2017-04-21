@@ -96,7 +96,7 @@ describe('test/multipart.test.js', () => {
       assert(res.status === 400);
       const data = JSON.parse(res.data);
       assert.deepEqual(data, {
-        message: 'Invalid filename extension: .rar',
+        message: 'Invalid filename: foo.rar',
       });
     });
 
@@ -218,7 +218,59 @@ describe('test/multipart.test.js', () => {
       assert(res.status === 400);
       const data = JSON.parse(res.data);
       assert.deepEqual(data, {
-        message: 'Invalid filename extension: .foo',
+        message: 'Invalid filename: foo.foo',
+      });
+    });
+  });
+
+  describe('whitelist-function', () => {
+    let app;
+    let server;
+    let host;
+    before(() => {
+      app = mock.app({
+        baseDir: 'apps/whitelist-function',
+      });
+      return app.ready();
+    });
+    before(function* () {
+      server = app.listen();
+      host = 'http://127.0.0.1:' + server.address().port;
+    });
+    after(() => app.close());
+    after(() => server.close());
+    beforeEach(() => app.mockCsrf());
+    afterEach(mock.restore);
+
+    it('should upload when extname pass whitelist function', function* () {
+      const form = formstream();
+      form.file('file', __filename, 'bar');
+      const headers = form.headers();
+      const res = yield urllib.request(host + '/upload.json', {
+        method: 'POST',
+        headers,
+        stream: form,
+      });
+
+      assert(res.status === 200);
+      const data = JSON.parse(res.data);
+      assert(data.filename === 'bar');
+    });
+
+    it('should throw 400 when extname not match whitelist function', function* () {
+      const form = formstream();
+      form.file('file', __filename, 'foo.png');
+      const headers = form.headers();
+      const res = yield urllib.request(host + '/upload.json', {
+        method: 'POST',
+        headers,
+        stream: form,
+      });
+
+      assert(res.status === 400);
+      const data = JSON.parse(res.data);
+      assert.deepEqual(data, {
+        message: 'Invalid filename: foo.png',
       });
     });
   });

@@ -20,10 +20,10 @@
 [download-image]: https://img.shields.io/npm/dm/egg-multipart.svg?style=flat-square
 [download-url]: https://npmjs.org/package/egg-multipart
 
-通过内置 [multipart](https://github.com/cojs/multipart) 实现了文件流式上传，
+通过内置 [co-busboy](https://github.com/cojs/busboy) 实现了文件流式上传，
 能做到请求文件数据不落地本地磁盘即可完成处理。
 
-在应用中通过 `this.multipart()` 拿到文件流，直接传给图片处理模块 gm 或者直接上传到云存储 tfs 和 oss 都是可以实现的。
+在应用中通过 `ctx.multipart()` 拿到文件流，直接传给图片处理模块 gm 或者直接上传到云存储 oss 都是可以实现的。
 
 ## 文件扩展名白名单
 
@@ -32,7 +32,7 @@
 默认的文件扩展名白名单如下：
 
 ```js
-var whitelist = [
+const whitelist = [
   // images
   '.jpg', '.jpeg', // image/jpeg
   '.png', // image/png, image/x-png
@@ -72,7 +72,7 @@ exports.multipart = {
 };
 ```
 
-也可以选择__覆盖__内置的 whitelist 列表，例如只允许上传 png 图片：
+也可以选择**覆盖**内置的 whitelist 列表，例如只允许上传 png 图片：
 
 ```js
 exports.multipart = {
@@ -82,7 +82,15 @@ exports.multipart = {
 };
 ```
 
-__注意，当传递了 `whitelist` 参数的时候 `fileExtensions` 参数失效。__
+或函数方式：
+
+```js
+exports.multipart = {
+  whitelist: (filename) => [ '.png' ].includes(path.extname(filename) || '')
+};
+```
+
+**注意，当传递了 `whitelist` 参数的时候 `fileExtensions` 参数失效。**
 
 ## 使用示例
 
