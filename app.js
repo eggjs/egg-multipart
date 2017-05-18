@@ -16,7 +16,7 @@ module.exports = app => {
   if (typeof options.whitelist === 'function') {
     checkExt = options.whitelist;
   } else if (Array.isArray(options.whitelist)) {
-    checkExt = filename => options.whitelist.includes(path.extname(filename) || '');
+    checkExt = filename => options.whitelist.includes(path.extname(filename).toLowerCase() || '');
   } else {
     // default extname whitelist
     const whitelist = [
