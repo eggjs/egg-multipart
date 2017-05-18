@@ -16,9 +16,9 @@ module.exports = app => {
   if (typeof options.whitelist === 'function') {
     checkExt = options.whitelist;
   } else if (Array.isArray(options.whitelist)) {
-    checkExt = filename => options.whitelist
-      .map(extname => extname.toLowerCase())
-      .includes(path.extname(filename).toLowerCase() || '');
+    options.whitelist = options.whitelist.map(extname => extname.toLowerCase());
+
+    checkExt = filename => options.whitelist.includes(path.extname(filename).toLowerCase() || '');
   } else {
     // default extname whitelist
     const whitelist = [
@@ -45,7 +45,9 @@ module.exports = app => {
       '.mp3',
       '.mp4',
       '.avi',
-    ].concat(options.fileExtensions || []);
+    ]
+      .concat(options.fileExtensions || [])
+      .map(extname => extname.toLowerCase());
 
     checkExt = filename => whitelist.includes(path.extname(filename).toLowerCase() || '');
   }
