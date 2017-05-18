@@ -152,6 +152,21 @@ describe('test/multipart.test.js', () => {
       assert(data.filename === 'bar.foo');
     });
 
+    it('should upload when extname speicified in fileExtensions and extname is in upper case', function* () {
+      const form = formstream();
+      form.file('file', __filename, 'bar.BAR');
+      const headers = form.headers();
+      const res = yield urllib.request(host + '/upload.json', {
+        method: 'POST',
+        headers,
+        stream: form,
+      });
+
+      assert(res.status === 200);
+      const data = JSON.parse(res.data);
+      assert(data.filename === 'bar.BAR');
+    });
+
     it('should 400 upload with wrong content-type', function* () {
       const res = yield urllib.request(host + '/upload', {
         method: 'POST',
@@ -204,6 +219,22 @@ describe('test/multipart.test.js', () => {
       const data = JSON.parse(res.data);
       assert(data.filename === 'bar.whitelist');
     });
+
+    it('should upload when extname speicified in whitelist and extname is in upper case', function* () {
+      const form = formstream();
+      form.file('file', __filename, 'bar.WHITELIST');
+      const headers = form.headers();
+      const res = yield urllib.request(host + '/upload.json', {
+        method: 'POST',
+        headers,
+        stream: form,
+      });
+
+      assert(res.status === 200);
+      const data = JSON.parse(res.data);
+      assert(data.filename === 'bar.WHITELIST');
+    });
+
 
     it('should throw 400 when extname speicified in fileExtensions, but not in whitelist', function* () {
       const form = formstream();
