@@ -257,6 +257,21 @@ describe('test/multipart.test.js', () => {
       assert(data.filename === 'bar');
     });
 
+    it('should upload when extname pass whitelist function and the extname is upper case', function* () {
+      const form = formstream();
+      form.file('file', __filename, 'bar.JPG');
+      const headers = form.headers();
+      const res = yield urllib.request(host + '/upload.json', {
+        method: 'POST',
+        headers,
+        stream: form,
+      });
+
+      assert(res.status === 200);
+      const data = JSON.parse(res.data);
+      assert(data.filename === 'bar');
+    });
+
     it('should throw 400 when extname not match whitelist function', function* () {
       const form = formstream();
       form.file('file', __filename, 'foo.png');
