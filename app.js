@@ -16,7 +16,9 @@ module.exports = app => {
   if (typeof options.whitelist === 'function') {
     checkExt = options.whitelist;
   } else if (Array.isArray(options.whitelist)) {
-    checkExt = filename => options.whitelist.includes(path.extname(filename).toLowerCase() || '');
+    checkExt = filename => options.whitelist
+      .map(extname => extname.toLowerCase())
+      .includes(path.extname(filename).toLowerCase() || '');
   } else {
     // default extname whitelist
     const whitelist = [
@@ -45,7 +47,7 @@ module.exports = app => {
       '.avi',
     ].concat(options.fileExtensions || []);
 
-    checkExt = filename => whitelist.includes(path.extname(filename) || '');
+    checkExt = filename => whitelist.includes(path.extname(filename).toLowerCase() || '');
   }
 
   // https://github.com/mscdex/busboy#busboy-methods
