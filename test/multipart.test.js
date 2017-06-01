@@ -95,9 +95,7 @@ describe('test/multipart.test.js', () => {
 
       assert(res.status === 400);
       const data = JSON.parse(res.data);
-      assert.deepEqual(data, {
-        message: 'Invalid filename: foo.rar',
-      });
+      assert(data.message === 'Invalid filename: foo.rar');
     });
 
     it('should not throw 400 when file not speicified', function* () {
@@ -113,9 +111,7 @@ describe('test/multipart.test.js', () => {
 
       assert(res.status === 200);
       const data = JSON.parse(res.data);
-      assert.deepEqual(data, {
-        message: 'no file',
-      });
+      assert(data.message === 'no file');
     });
 
     it('should not throw 400 when file stream empty', function* () {
@@ -132,9 +128,7 @@ describe('test/multipart.test.js', () => {
 
       assert(res.status === 200);
       const data = JSON.parse(res.data);
-      assert.deepEqual(data, {
-        message: 'no file',
-      });
+      assert(data.message === 'no file');
     });
 
     it('should upload when extname speicified in fileExtensions', function* () {
@@ -179,10 +173,11 @@ describe('test/multipart.test.js', () => {
     it('should 400 upload.json with wrong content-type', function* () {
       const res = yield urllib.request(host + '/upload.json', {
         method: 'POST',
+        dataType: 'json',
       });
 
       assert(res.status === 400);
-      assert(res.data.toString() === '{"message":"Content-Type must be multipart/*"}');
+      assert(res.data.message === 'Content-Type must be multipart/*');
     });
   });
 
@@ -248,9 +243,7 @@ describe('test/multipart.test.js', () => {
 
       assert(res.status === 400);
       const data = JSON.parse(res.data);
-      assert.deepEqual(data, {
-        message: 'Invalid filename: foo.foo',
-      });
+      assert(data.message === 'Invalid filename: foo.foo');
     });
   });
 
@@ -300,9 +293,7 @@ describe('test/multipart.test.js', () => {
 
       assert(res.status === 400);
       const data = JSON.parse(res.data);
-      assert.deepEqual(data, {
-        message: 'Invalid filename: foo.png',
-      });
+      assert(data.message === 'Invalid filename: foo.png');
     });
   });
 
