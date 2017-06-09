@@ -49,6 +49,7 @@ module.exports = {
         err.fields = stream.fields;
         if (stream.listenerCount('error') > 0) {
           stream.emit('error', err);
+          ctx.coreLogger.warn(err);
         } else {
           ctx.coreLogger.error(err);
           // ignore next error event

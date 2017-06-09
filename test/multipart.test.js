@@ -5,7 +5,7 @@ const request = require('supertest');
 const formstream = require('formstream');
 const urllib = require('urllib');
 const path = require('path');
-const fs = require('fs');
+const fs = require('mz/fs');
 const mock = require('egg-mock');
 
 describe('test/multipart.test.js', () => {
@@ -433,17 +433,17 @@ describe('test/multipart.test.js', () => {
       return app.ready();
     });
     before(function* () {
-      fs.writeFileSync(bigfile, new Buffer(1024 * 1024 * 2));
+      yield fs.writeFile(bigfile, new Buffer(1024 * 1024 * 2));
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
       yield request(server)
         .get('/upload')
         .expect(200);
     });
-    after(() => {
-      fs.unlinkSync(bigfile);
+    after(function* () {
+      yield fs.unlink(bigfile);
       server.close();
-      return app.close();
+      yield app.close();
     });
     beforeEach(() => app.mockCsrf());
     afterEach(mock.restore);
@@ -465,6 +465,10 @@ describe('test/multipart.test.js', () => {
       const data = res.data;
       assert(res.status === 413);
       assert(data.message === 'Request file too large');
+
+      const coreLogPath = path.join(app.baseDir, 'logs/oss/egg-web.log');
+      const content = yield fs.readFile(coreLogPath, 'utf8');
+      assert(content.includes('nodejs.MultipartFileTooLargeError: Request file too large'));
     });
   });
 });
