@@ -466,8 +466,8 @@ describe('test/multipart.test.js', () => {
       assert(res.status === 413);
       assert(data.message === 'Request file too large');
 
-      const errorLogPath = path.join(app.baseDir, 'logs/oss/common-error.log');
-      const content = yield fs.readFile(errorLogPath, 'utf8');
+      const coreLogPath = path.join(app.baseDir, 'logs/oss/oss-web.log');
+      const content = yield fs.readFile(coreLogPath, 'utf8');
       assert(content.includes('nodejs.MultipartFileTooLargeError: Request file too large'));
     });
   });
