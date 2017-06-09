@@ -58,6 +58,17 @@ const whitelist = [
 ];
 ```
 
+### fileSize
+
+The default fileSize that multipart can accept is `10mb`. if you upload a large file, you should specify this config.
+
+```js
+// config/config.default.js
+exports.multipart = {
+  fileSize: '50m',
+};
+```
+
 ### Custom Config
 
 Developer can custom additional file extentions:
