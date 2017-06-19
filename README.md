@@ -65,7 +65,7 @@ The default fileSize that multipart can accept is `10mb`. if you upload a large 
 ```js
 // config/config.default.js
 exports.multipart = {
-  fileSize: '50m',
+  fileSize: '50mb',
 };
 ```
 
