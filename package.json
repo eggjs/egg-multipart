@@ -63,6 +63,6 @@
     "stream-wormhole": "^1.0.3",
     "supertest": "^3.0.0",
     "urllib": "^2.22.0",
-    "webstorm-disable-index": "^1.1.2"
+    "webstorm-disable-index": "^1.2.0"
   }
 }
