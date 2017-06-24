@@ -1,7 +1,6 @@
 'use strict';
 
 const assert = require('assert');
-const request = require('supertest');
 const formstream = require('formstream');
 const urllib = require('urllib');
 const path = require('path');
@@ -295,6 +294,21 @@ describe('test/multipart.test.js', () => {
       const data = JSON.parse(res.data);
       assert(data.message === 'Invalid filename: foo.png');
     });
+
+    it('should throw 400 when whitelist function throw error', function* () {
+      const form = formstream();
+      form.file('file', __filename, 'error');
+      const headers = form.headers();
+      const res = yield urllib.request(host + '/upload.json', {
+        method: 'POST',
+        headers,
+        stream: form,
+      });
+
+      assert(res.status === 400);
+      const data = JSON.parse(res.data);
+      assert(data.message === 'mock checkExt error');
+    });
   });
 
   describe('upload one file', () => {
@@ -310,7 +324,7 @@ describe('test/multipart.test.js', () => {
     before(function* () {
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
-      yield request(server)
+      yield app.httpRequest()
         .get('/upload')
         .expect(200);
     });
@@ -436,7 +450,7 @@ describe('test/multipart.test.js', () => {
       yield fs.writeFile(bigfile, new Buffer(1024 * 1024 * 2));
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
-      yield request(server)
+      yield app.httpRequest()
         .get('/upload')
         .expect(200);
     });
@@ -469,6 +483,54 @@ describe('test/multipart.test.js', () => {
       const coreLogPath = path.join(app.baseDir, 'logs/oss/egg-web.log');
       const content = yield fs.readFile(coreLogPath, 'utf8');
       assert(content.includes('nodejs.MultipartFileTooLargeError: Request file too large'));
+    });
+
+    it('should ignore error when stream not handle error event', function* () {
+      const form = formstream();
+      form.field('foo', 'bar').field('[', 'toString').field(']', 'toString');
+      form.file('file', bigfile, 'not-handle-error-event.js');
+
+      const headers = form.headers();
+      const url = host + '/upload';
+      const res = yield urllib.request(url, {
+        method: 'POST',
+        headers,
+        stream: form,
+        dataType: 'json',
+      });
+
+      const data = res.data;
+      assert(res.status === 200);
+      assert(data.url);
+
+      const coreLogPath = path.join(app.baseDir, 'logs/oss/common-error.log');
+      const content = yield fs.readFile(coreLogPath, 'utf8');
+      assert(content.includes('nodejs.MultipartFileTooLargeError: Request file too large'));
+      assert(content.includes("filename: 'not-handle-error-event.js'"));
+    });
+
+    it('should ignore stream next errors after limit event fire', function* () {
+      const form = formstream();
+      form.field('foo', 'bar').field('[', 'toString').field(']', 'toString');
+      form.file('file', bigfile, 'not-handle-error-event-and-mock-stream-error.js');
+
+      const headers = form.headers();
+      const url = host + '/upload';
+      const res = yield urllib.request(url, {
+        method: 'POST',
+        headers,
+        stream: form,
+        dataType: 'json',
+      });
+
+      const data = res.data;
+      assert(res.status === 200);
+      assert(data.url);
+
+      const coreLogPath = path.join(app.baseDir, 'logs/oss/common-error.log');
+      const content = yield fs.readFile(coreLogPath, 'utf8');
+      assert(content.includes('nodejs.MultipartFileTooLargeError: Request file too large'));
+      assert(content.includes("filename: 'not-handle-error-event-and-mock-stream-error.js'"));
     });
   });
 });

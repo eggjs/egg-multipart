@@ -47,6 +47,7 @@ module.exports = {
         err.name = 'MultipartFileTooLargeError';
         err.status = 413;
         err.fields = stream.fields;
+        err.filename = stream.filename;
         if (stream.listenerCount('error') > 0) {
           stream.emit('error', err);
           ctx.coreLogger.warn(err);

@@ -17,8 +17,7 @@ module.exports = app => {
     checkExt = options.whitelist;
   } else if (Array.isArray(options.whitelist)) {
     options.whitelist = options.whitelist.map(extname => extname.toLowerCase());
-
-    checkExt = filename => options.whitelist.includes(path.extname(filename).toLowerCase() || '');
+    checkExt = filename => options.whitelist.includes(path.extname(filename).toLowerCase());
   } else {
     // default extname whitelist
     const whitelist = [
@@ -49,7 +48,7 @@ module.exports = app => {
       .concat(options.fileExtensions || [])
       .map(extname => extname.toLowerCase());
 
-    checkExt = filename => whitelist.includes(path.extname(filename).toLowerCase() || '');
+    checkExt = filename => whitelist.includes(path.extname(filename).toLowerCase());
   }
 
   // https://github.com/mscdex/busboy#busboy-methods
