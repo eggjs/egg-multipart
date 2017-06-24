@@ -403,7 +403,7 @@ describe('test/multipart.test.js', () => {
       });
 
       assert(res.status === 400);
-      assert(res.data.toString().includes('Can&#39;t found upload file'));
+      assert(res.data.toString().includes('Can\'t found upload file'));
     });
 
     it('should 400 when no file speicified', function* () {
@@ -417,7 +417,7 @@ describe('test/multipart.test.js', () => {
         stream: form,
       });
       assert(res.status === 400);
-      assert(res.data.toString().includes('Can&#39;t found upload file'));
+      assert(res.data.toString().includes('Can\'t found upload file'));
     });
   });
 
