@@ -16,10 +16,13 @@ module.exports = app => {
         const writeStream = fs.createWriteStream(storefile);
         stream.pipe(writeStream);
 
-        stream.on('error', err => {
-          console.log('read stream error: %s', err);
-          reject(err);
-        });
+        if (!name.includes('not-handle-error-event')) {
+          stream.on('error', err => {
+            console.log('read stream error: %s', err);
+            reject(err);
+          });
+        }
+
         writeStream.on('error', err => {
           console.log('write stream error: %s', err);
           reject(err);
@@ -46,6 +49,9 @@ module.exports = app => {
     const stream = yield this.getFileStream();
     const name = 'egg-multipart-test/' + process.version + '-' + Date.now() + '-' + path.basename(stream.filename);
     const result = yield this.oss.put(name, stream);
+    if (name.includes('not-handle-error-event-and-mock-stream-error')) {
+      process.nextTick(() => stream.emit('error', new Error('mock stream unhandle error')));
+    }
     this.body = {
       name: result.name,
       url: result.url,

@@ -54,7 +54,7 @@
     "egg-bin": "^4.0.4",
     "egg-ci": "^1.8.0",
     "egg-mock": "^3.8.0",
-    "eslint": "^3.19.0",
+    "eslint": "^4.1.0",
     "eslint-config-egg": "^4.2.1",
     "formstream": "^1.1.0",
     "is-type-of": "^1.0.0",
