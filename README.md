@@ -24,9 +24,9 @@ Use [co-busboy](https://github.com/cojs/busboy) to upload file by streaming and 
 
 Just use `ctx.multipart()` to got file stream, then pass to image processing liberary such as `gm` or upload to cloud storage such as `oss`.
 
-## Whitelist of file extendtions
+## Whitelist of file extensions
 
-For security, if uploading file extendtion is not in white list, will response as `400 Bad request`.
+For security, if uploading file extension is not in white list, will response as `400 Bad request`.
 
 Default Whitelist:
 
@@ -71,7 +71,7 @@ exports.multipart = {
 
 ### Custom Config
 
-Developer can custom additional file extentions:
+Developer can custom additional file extensions:
 
 ```js
 // config/config.default.js
