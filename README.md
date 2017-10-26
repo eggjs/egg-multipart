@@ -107,6 +107,8 @@ exports.multipart = {
 
 ## Examples
 
+[More Examples](https://github.com/eggjs/examples/tree/master/multipart)
+
 ### Upload File
 
 You can got upload stream by `ctx.getFileStream*()`.
@@ -189,7 +191,7 @@ module.exports = function* (ctx) {
       try {
         result = yield ctx.oss.put('egg-multipart-test/' + part.filename, part);
       } catch (err) {
-        yield sendToWormhole(stream);
+        yield sendToWormhole(part);
         throw err;
       }
       console.log(result);
