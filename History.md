@@ -1,4 +1,16 @@
 
+1.5.1 / 2017-10-27
+==================
+
+**fixes**
+  * [[`a7778e5`](http://github.com/eggjs/egg-multipart/commit/a7778e58f603c5efe298c8a651356d203afefed0)] - fix: fileSize typo (#10) (tangyao <<2001-wms@163.com>>)
+
+**others**
+  * [[`f95e322`](http://github.com/eggjs/egg-multipart/commit/f95e32287570f8f79de3061abfdfcbc93823f44f)] - docs: add more example (#14) (Haoliang Gao <<sakura9515@gmail.com>>)
+  * [[`b0785e3`](http://github.com/eggjs/egg-multipart/commit/b0785e34bb68b18af0d9f50bc3bf40cb91987391)] - docs: s/extention/extension (#13) (Sen Yang <<jasonslyvia@users.noreply.github.com>>)
+  * [[`d67fcf5`](http://github.com/eggjs/egg-multipart/commit/d67fcf5b64d0252345e04325c170e14786bc55a4)] - test: improve code coverage (#12) (fengmk2 <<fengmk2@gmail.com>>)
+  * [[`c8b77df`](http://github.com/eggjs/egg-multipart/commit/c8b77dfa9ad44dace89ef62531f182a4960843f6)] - test: fix failing test (#11) (Haoliang Gao <<sakura9515@gmail.com>>)
+
 1.5.0 / 2017-06-09
 ==================
 
