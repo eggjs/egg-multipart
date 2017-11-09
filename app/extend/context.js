@@ -1,7 +1,6 @@
 'use strict';
 
 const parse = require('co-busboy');
-const co = require('co');
 
 module.exports = {
   /**
@@ -24,7 +23,7 @@ module.exports = {
    * get upload file stream
    * @example
    * ```js
-   * const stream = yield this.getFileStream();
+   * const stream = await ctx.getFileStream();
    * // get other fields
    * console.log(stream.fields);
    * ```
@@ -34,9 +33,9 @@ module.exports = {
    */
   getFileStream() {
     const ctx = this;
-    return co(function* () {
+    const readStream = async () => {
       const parts = ctx.multipart({ autoFields: true });
-      const stream = yield parts;
+      const stream = await parts();
       // stream not exists, treat as an exception
       if (!stream || !stream.filename) {
         ctx.throw(400, 'Can\'t found upload file');
@@ -60,6 +59,8 @@ module.exports = {
         stream.resume();
       });
       return stream;
-    });
+    };
+
+    return readStream();
   },
 };

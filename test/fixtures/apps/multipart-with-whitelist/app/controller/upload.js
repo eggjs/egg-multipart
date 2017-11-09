@@ -3,10 +3,10 @@
 const path = require('path');
 const fs = require('fs');
 
-module.exports = function* () {
-  const parts = this.multipart();
+module.exports = async ctx => {
+  const parts = ctx.multipart();
   let part;
-  while ((part = yield parts) != null) {
+  while ((part = await parts()) != null) {
     if (Array.isArray(part)) {
       continue;
     } else {
@@ -14,9 +14,9 @@ module.exports = function* () {
     }
   }
 
-  const ws = fs.createWriteStream(path.join(this.app.config.logger.dir, 'multipart-test-file'));
+  const ws = fs.createWriteStream(path.join(ctx.app.config.logger.dir, 'multipart-test-file'));
   part.pipe(ws);
-  this.body = {
+  ctx.body = {
     filename: part.filename,
   };
 };

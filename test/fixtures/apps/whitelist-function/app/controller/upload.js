@@ -3,10 +3,11 @@
 const path = require('path');
 const fs = require('fs');
 
+// keep one generator function test case
 module.exports = function* () {
   const parts = this.multipart();
   let part;
-  while ((part = yield parts) != null) {
+  while ((part = yield parts()) != null) {
     if (Array.isArray(part)) {
       continue;
     } else {

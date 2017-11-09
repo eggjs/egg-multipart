@@ -4,10 +4,10 @@ const path = require('path');
 const fs = require('fs');
 const sendToWormhole = require('stream-wormhole');
 
-module.exports = function* () {
-  const parts = this.multipart();
+module.exports = async ctx => {
+  const parts = ctx.multipart();
   let part;
-  while ((part = yield parts) != null) {
+  while ((part = await parts()) != null) {
     if (Array.isArray(part)) {
       continue;
     } else {
@@ -19,30 +19,30 @@ module.exports = function* () {
   // 例如 文件是必须字段，那么就报错
   // 这里只是给出提示
   if (!part || !part.filename) {
-    this.body = {
+    ctx.body = {
       message: 'no file',
     };
     return;
   }
 
-  if (this.query.mock_stream_error) {
+  if (ctx.query.mock_stream_error) {
     // mock save stream error
-    const filepath = path.join(this.app.config.logger.dir, 'not-exists-dir/dir2/testfile');
+    const filepath = path.join(ctx.app.config.logger.dir, 'not-exists-dir/dir2/testfile');
     try {
-      yield saveStream(part, filepath);
+      await saveStream(part, filepath);
     } catch (err) {
-      yield sendToWormhole(part);
+      await sendToWormhole(part);
       throw err;
     }
 
-    this.body = {
+    ctx.body = {
       filename: part.filename,
     };
   }
 
-  const filepath = path.join(this.app.config.logger.dir, 'multipart-test-file');
-  yield saveStream(part, filepath);
-  this.body = {
+  const filepath = path.join(ctx.app.config.logger.dir, 'multipart-test-file');
+  await saveStream(part, filepath);
+  ctx.body = {
     filename: part.filename,
   };
 };
