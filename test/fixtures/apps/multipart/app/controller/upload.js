@@ -15,9 +15,6 @@ module.exports = async ctx => {
     }
   }
 
-  // 并没有文件被上传，这时候需要根据业务需要做针对性的处理
-  // 例如 文件是必须字段，那么就报错
-  // 这里只是给出提示
   if (!part || !part.filename) {
     ctx.body = {
       message: 'no file',
