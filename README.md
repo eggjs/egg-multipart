@@ -127,25 +127,29 @@ Controller which hanlder `POST /upload`:
 // app/controller/upload.js
 const path = require('path');
 const sendToWormhole = require('stream-wormhole');
+const Controller = require('egg').Controller;
 
-module.exports = function* (ctx) {
-  const stream = yield ctx.getFileStream();
-  const name = 'egg-multipart-test/' + path.basename(stream.filename);
-  let result;
-  try {
-    // process file or upload to cloud storage
-    result = yield ctx.oss.put(name, stream);
-  } catch (err) {
-    // must consume the stream, otherwise browser will be stuck.
-    yield sendToWormhole(stream);
-    throw err;
+module.exports = Class UploadController extends Controller {
+  async upload() {
+    const ctx = this.ctx;
+    const stream = await ctx.getFileStream();
+    const name = 'egg-multipart-test/' + path.basename(stream.filename);
+    let result;
+    try {
+      // process file or upload to cloud storage
+      result = await ctx.oss.put(name, stream);
+    } catch (err) {
+      // must consume the stream, otherwise browser will be stuck.
+      await sendToWormhole(stream);
+      throw err;
+    }
+
+    ctx.body = {
+      url: result.url,
+      // process form fields by `stream.fields`
+      fields: stream.fields,
+    };
   }
-
-  ctx.body = {
-    url: result.url,
-    // process form fields by `stream.fields`
-    fields: stream.fields,
-  };
 };
 ```
 
@@ -164,39 +168,43 @@ Controller which hanlder `POST /upload`:
 ```js
 // app/controller/upload.js
 const sendToWormhole = require('stream-wormhole');
+const Controller = require('egg').Controller;
 
-module.exports = function* (ctx) {
-  const parts = ctx.multipart();
-  let part;
-  while ((part = yield parts) != null) {
-    if (part.length) {
-      // arrays are busboy fields
-      console.log('field: ' + part[0]);
-      console.log('value: ' + part[1]);
-      console.log('valueTruncated: ' + part[2]);
-      console.log('fieldnameTruncated: ' + part[3]);
-    } else {
-      if (!part.filename) {
-        // user click `upload` before choose a file,
-        // `part` will be file stream, but `part.filename` is empty
-        // must handler this, such as log error.
-        return;
+module.exports = Class UploadController extends Controller {
+  async upload() {
+    const ctx = this.ctx;
+    const parts = ctx.multipart();
+    let part;
+    while ((part = await parts()) != null) {
+      if (part.length) {
+        // arrays are busboy fields
+        console.log('field: ' + part[0]);
+        console.log('value: ' + part[1]);
+        console.log('valueTruncated: ' + part[2]);
+        console.log('fieldnameTruncated: ' + part[3]);
+      } else {
+        if (!part.filename) {
+          // user click `upload` before choose a file,
+          // `part` will be file stream, but `part.filename` is empty
+          // must handler this, such as log error.
+          return;
+        }
+        // otherwise, it's a stream
+        console.log('field: ' + part.fieldname);
+        console.log('filename: ' + part.filename);
+        console.log('encoding: ' + part.encoding);
+        console.log('mime: ' + part.mime);
+        let result;
+        try {
+          result = await ctx.oss.put('egg-multipart-test/' + part.filename, part);
+        } catch (err) {
+          await sendToWormhole(part);
+          throw err;
+        }
+        console.log(result);
       }
-      // otherwise, it's a stream
-      console.log('field: ' + part.fieldname);
-      console.log('filename: ' + part.filename);
-      console.log('encoding: ' + part.encoding);
-      console.log('mime: ' + part.mime);
-      let result;
-      try {
-        result = yield ctx.oss.put('egg-multipart-test/' + part.filename, part);
-      } catch (err) {
-        yield sendToWormhole(part);
-        throw err;
-      }
-      console.log(result);
     }
+    console.log('and we are done parsing the form!');
   }
-  console.log('and we are done parsing the form!');
-}
+};
 ```

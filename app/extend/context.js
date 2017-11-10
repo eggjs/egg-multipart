@@ -1,7 +1,6 @@
 'use strict';
 
 const parse = require('co-busboy');
-const co = require('co');
 
 module.exports = {
   /**
@@ -24,7 +23,7 @@ module.exports = {
    * get upload file stream
    * @example
    * ```js
-   * const stream = yield this.getFileStream();
+   * const stream = await ctx.getFileStream();
    * // get other fields
    * console.log(stream.fields);
    * ```
@@ -32,34 +31,31 @@ module.exports = {
    * @return {ReadStream} stream
    * @since 1.0.0
    */
-  getFileStream() {
-    const ctx = this;
-    return co(function* () {
-      const parts = ctx.multipart({ autoFields: true });
-      const stream = yield parts;
-      // stream not exists, treat as an exception
-      if (!stream || !stream.filename) {
-        ctx.throw(400, 'Can\'t found upload file');
+  async getFileStream() {
+    const parts = this.multipart({ autoFields: true });
+    const stream = await parts();
+    // stream not exists, treat as an exception
+    if (!stream || !stream.filename) {
+      this.throw(400, 'Can\'t found upload file');
+    }
+    stream.fields = parts.field;
+    stream.once('limit', () => {
+      const err = new Error('Request file too large');
+      err.name = 'MultipartFileTooLargeError';
+      err.status = 413;
+      err.fields = stream.fields;
+      err.filename = stream.filename;
+      if (stream.listenerCount('error') > 0) {
+        stream.emit('error', err);
+        this.coreLogger.warn(err);
+      } else {
+        this.coreLogger.error(err);
+        // ignore next error event
+        stream.on('error', () => {});
       }
-      stream.fields = parts.field;
-      stream.once('limit', () => {
-        const err = new Error('Request file too large');
-        err.name = 'MultipartFileTooLargeError';
-        err.status = 413;
-        err.fields = stream.fields;
-        err.filename = stream.filename;
-        if (stream.listenerCount('error') > 0) {
-          stream.emit('error', err);
-          ctx.coreLogger.warn(err);
-        } else {
-          ctx.coreLogger.error(err);
-          // ignore next error event
-          stream.on('error', () => {});
-        }
-        // ignore all data
-        stream.resume();
-      });
-      return stream;
+      // ignore all data
+      stream.resume();
     });
+    return stream;
   },
 };
