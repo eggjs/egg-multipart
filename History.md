@@ -1,4 +1,10 @@
 
+2.0.0 / 2017-11-10
+==================
+
+**others**
+  * [[`6a7fa06`](http://github.com/eggjs/egg-multipart/commit/6a7fa06d8978d061950d339cdd685b1ace6995c3)] - refactor: use async function and support egg@2 (#15) (Yiyu He <<dead_horse@qq.com>>)
+
 1.5.1 / 2017-10-27
 ==================
 
