@@ -15,7 +15,10 @@ module.exports = {
       this.throw(400, 'Content-Type must be multipart/*');
     }
     const parseOptions = {};
+    const limits = {};
+    Object.assign(limits, this.app.config.multipartParseOptions.limits, (options && options.limits) || {});
     Object.assign(parseOptions, this.app.config.multipartParseOptions, options);
+    parseOptions.limits = limits;
     return parse(this, parseOptions);
   },
 
