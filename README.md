@@ -188,7 +188,7 @@ module.exports = Class UploadController extends Controller {
       },
       "checkFile": "<Function checkFile>"
     });
-     // will append to this.app.config.multipartParseOptions
+     // will assign this.app.config.multipartParseOptions
     */
     let part;
     while ((part = await parts()) != null) {
