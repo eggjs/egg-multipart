@@ -174,6 +174,22 @@ module.exports = Class UploadController extends Controller {
   async upload() {
     const ctx = this.ctx;
     const parts = ctx.multipart();
+    /**
+    //ctx custom config
+    const parts = ctx.multipart({
+      "autoFields": false,
+      "defCharset": "utf8",
+      "limits": {
+        "fieldNameSize": Number, // unit b
+        "fieldSize": Number, // unit b, 102400 ==> 100kb
+        "fields": Number,
+        "fileSize": Number, // unit b,10485760 ==> 10mb
+        "files": Number
+      },
+      "checkFile": "<Function checkFile>"
+    });
+     // will append to this.app.config.multipartParseOptions
+    */
     let part;
     while ((part = await parts()) != null) {
       if (part.length) {
