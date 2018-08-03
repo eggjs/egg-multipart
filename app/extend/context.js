@@ -1,6 +1,13 @@
 'use strict';
 
 const parse = require('co-busboy');
+const Readable = require('stream').Readable;
+
+class EmptyStream extends Readable {
+  _read() {
+    this.push(null);
+  }
+}
 
 module.exports = {
   /**
@@ -28,15 +35,25 @@ module.exports = {
    * console.log(stream.fields);
    * ```
    * @method Context#getFileStream
+   * @param {Object} options
+   *  - {Boolean} options.required - required file submit, default is true
    * @return {ReadStream} stream
    * @since 1.0.0
    */
-  async getFileStream() {
+  async getFileStream(options) {
+    options = options || {};
     const parts = this.multipart({ autoFields: true });
-    const stream = await parts();
-    // stream not exists, treat as an exception
-    if (!stream || !stream.filename) {
-      this.throw(400, 'Can\'t found upload file');
+    let stream = await parts();
+
+    if (options.required !== false) {
+      // stream not exists, treat as an exception
+      if (!stream || !stream.filename) {
+        this.throw(400, 'Can\'t found upload file');
+      }
+    }
+
+    if (!stream) {
+      stream = new EmptyStream();
     }
     stream.fields = parts.field;
     stream.once('limit', () => {
