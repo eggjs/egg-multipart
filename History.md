@@ -1,4 +1,10 @@
 
+2.1.0 / 2018-08-07
+==================
+
+**features**
+  * [[`5ece18a`](http://github.com/eggjs/egg-multipart/commit/5ece18abd0a1026fa742e15a7480010619156051)] - feat: getFileStream() can accept non file request (#17) (fengmk2 <<fengmk2@gmail.com>>)
+
 2.0.0 / 2017-11-10
 ==================
 
