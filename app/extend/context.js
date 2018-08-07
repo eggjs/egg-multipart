@@ -36,7 +36,7 @@ module.exports = {
    * ```
    * @method Context#getFileStream
    * @param {Object} options
-   *  - {Boolean} options.required - required file submit, default is true
+   *  - {Boolean} options.requireFile - required file submit, default is true
    * @return {ReadStream} stream
    * @since 1.0.0
    */
@@ -45,7 +45,7 @@ module.exports = {
     const parts = this.multipart({ autoFields: true });
     let stream = await parts();
 
-    if (options.required !== false) {
+    if (options.requireFile !== false) {
       // stream not exists, treat as an exception
       if (!stream || !stream.filename) {
         this.throw(400, 'Can\'t found upload file');

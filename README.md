@@ -155,7 +155,7 @@ module.exports = Class UploadController extends Controller {
   async uploadNotRequiredFile() {
     const ctx = this.ctx;
     // file not required
-    const stream = await ctx.getFileStream({ required: false });
+    const stream = await ctx.getFileStream({ requireFile: false });
     let result;
     if (stream.filename) {
       const name = 'egg-multipart-test/' + path.basename(stream.filename);
