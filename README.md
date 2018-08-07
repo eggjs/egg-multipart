@@ -132,6 +132,7 @@ const Controller = require('egg').Controller;
 module.exports = Class UploadController extends Controller {
   async upload() {
     const ctx = this.ctx;
+    // file not exists will response 400 error
     const stream = await ctx.getFileStream();
     const name = 'egg-multipart-test/' + path.basename(stream.filename);
     let result;
@@ -146,6 +147,33 @@ module.exports = Class UploadController extends Controller {
 
     ctx.body = {
       url: result.url,
+      // process form fields by `stream.fields`
+      fields: stream.fields,
+    };
+  }
+
+  async uploadNotRequiredFile() {
+    const ctx = this.ctx;
+    // file not required
+    const stream = await ctx.getFileStream({ requireFile: false });
+    let result;
+    if (stream.filename) {
+      const name = 'egg-multipart-test/' + path.basename(stream.filename);
+      try {
+        // process file or upload to cloud storage
+        result = await ctx.oss.put(name, stream);
+      } catch (err) {
+        // must consume the stream, otherwise browser will be stuck.
+        await sendToWormhole(stream);
+        throw err;
+      }
+    } else {
+      // must consume the empty stream
+      await sendToWormhole(stream);
+    }
+
+    ctx.body = {
+      url: result && result.url,
       // process form fields by `stream.fields`
       fields: stream.fields,
     };

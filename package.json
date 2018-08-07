@@ -40,7 +40,7 @@
     "app.js"
   ],
   "ci": {
-    "version": "8, 9",
+    "version": "8, 10",
     "license": true
   },
   "dependencies": {
@@ -48,20 +48,20 @@
     "humanize-bytes": "^1.0.1"
   },
   "devDependencies": {
-    "autod": "^2.10.1",
-    "egg": "next",
-    "egg-bin": "^4.3.5",
+    "autod": "^3.0.1",
+    "egg": "^2.9.1",
+    "egg-bin": "^4.8.1",
     "egg-ci": "^1.8.0",
-    "egg-mock": "^3.13.1",
-    "eslint": "^4.10.0",
-    "eslint-config-egg": "^5.1.1",
+    "egg-mock": "^3.18.0",
+    "eslint": "^5.2.0",
+    "eslint-config-egg": "^7.0.0",
     "formstream": "^1.1.0",
     "is-type-of": "^1.0.0",
     "mkdirp": "^0.5.1",
     "mz": "^2.7.0",
     "stream-wormhole": "^1.0.3",
     "supertest": "^3.0.0",
-    "urllib": "^2.25.1",
+    "urllib": "^2.29.1",
     "webstorm-disable-index": "^1.2.0"
   }
 }

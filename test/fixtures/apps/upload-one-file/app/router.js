@@ -53,4 +53,6 @@ module.exports = app => {
   });
 
   app.post('/upload/async', 'async.async');
+
+  app.post('/upload/allowEmpty', 'async.allowEmpty');
 };
