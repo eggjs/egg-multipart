@@ -135,15 +135,8 @@ module.exports = Class UploadController extends Controller {
     // file not exists will response 400 error
     const stream = await ctx.getFileStream();
     const name = 'egg-multipart-test/' + path.basename(stream.filename);
-    let result;
-    try {
-      // process file or upload to cloud storage
-      result = await ctx.oss.put(name, stream);
-    } catch (err) {
-      // must consume the stream, otherwise browser will be stuck.
-      await sendToWormhole(stream);
-      throw err;
-    }
+    // process file or upload to cloud storage
+    const result = await ctx.oss.put(name, stream);
 
     ctx.body = {
       url: result.url,
@@ -159,14 +152,8 @@ module.exports = Class UploadController extends Controller {
     let result;
     if (stream.filename) {
       const name = 'egg-multipart-test/' + path.basename(stream.filename);
-      try {
-        // process file or upload to cloud storage
-        result = await ctx.oss.put(name, stream);
-      } catch (err) {
-        // must consume the stream, otherwise browser will be stuck.
-        await sendToWormhole(stream);
-        throw err;
-      }
+      // process file or upload to cloud storage
+      const result = await ctx.oss.put(name, stream);
     } else {
       // must consume the empty stream
       await sendToWormhole(stream);
@@ -195,7 +182,6 @@ Controller which hanlder `POST /upload`:
 
 ```js
 // app/controller/upload.js
-const sendToWormhole = require('stream-wormhole');
 const Controller = require('egg').Controller;
 
 module.exports = Class UploadController extends Controller {
@@ -222,13 +208,7 @@ module.exports = Class UploadController extends Controller {
         console.log('filename: ' + part.filename);
         console.log('encoding: ' + part.encoding);
         console.log('mime: ' + part.mime);
-        let result;
-        try {
-          result = await ctx.oss.put('egg-multipart-test/' + part.filename, part);
-        } catch (err) {
-          await sendToWormhole(part);
-          throw err;
-        }
+        const result = await ctx.oss.put('egg-multipart-test/' + part.filename, part);
         console.log(result);
       }
     }
