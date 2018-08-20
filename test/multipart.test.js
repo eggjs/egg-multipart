@@ -1,11 +1,17 @@
 'use strict';
 
 const assert = require('assert');
+const Agent = require('http').Agent;
 const formstream = require('formstream');
 const urllib = require('urllib');
 const path = require('path');
 const fs = require('mz/fs');
 const mock = require('egg-mock');
+const sleep = require('mz-modules/sleep');
+
+const agent = new Agent({
+  keepAlive: true,
+});
 
 describe('test/multipart.test.js', () => {
   describe('multipart', () => {
@@ -80,6 +86,28 @@ describe('test/multipart.test.js', () => {
       });
 
       assert(res.data.toString().includes('ENOENT:'));
+    });
+
+    it('should auto consumed file stream on error throw', function* () {
+      for (let i = 0; i < 10; i++) {
+        const form = formstream();
+        form.file('file', path.join(__dirname, 'fixtures/bigfile.js'));
+
+        const headers = form.headers();
+        const url = host + '/upload?mock_undefined_error=1';
+        const result = yield urllib.request(url, {
+          method: 'POST',
+          headers,
+          stream: form,
+          dataType: 'json',
+          agent,
+        });
+
+        assert(result.status === 500);
+        const data = result.data;
+        assert(data.message === 'part.foo is not a function');
+        yield sleep(100);
+      }
     });
 
     it('should throw 400 when extname wrong', function* () {
@@ -455,6 +483,28 @@ describe('test/multipart.test.js', () => {
       });
       assert(res.status === 400);
       assert(res.data.toString().includes('Can\'t found upload file'));
+    });
+
+    it('should auto consumed file stream on error throw', function* () {
+      for (let i = 0; i < 10; i++) {
+        const form = formstream();
+        form.file('file', path.join(__dirname, 'fixtures/bigfile.js'));
+
+        const headers = form.headers();
+        const url = host + '/upload/async?foo=error';
+        const result = yield urllib.request(url, {
+          method: 'POST',
+          headers,
+          stream: form,
+          dataType: 'json',
+          agent,
+        });
+
+        assert(result.status === 500);
+        const data = result.data;
+        assert(data.message === 'stream.foo is not a function');
+        yield sleep(100);
+      }
     });
   });
 

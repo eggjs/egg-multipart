@@ -59,6 +59,7 @@
     "is-type-of": "^1.0.0",
     "mkdirp": "^0.5.1",
     "mz": "^2.7.0",
+    "mz-modules": "^2.1.0",
     "stream-wormhole": "^1.0.3",
     "supertest": "^3.0.0",
     "urllib": "^2.29.1",

@@ -37,6 +37,10 @@ module.exports = async ctx => {
     };
   }
 
+  if (ctx.query.mock_undefined_error) {
+    part.foo();
+  }
+
   const filepath = path.join(ctx.app.config.logger.dir, 'multipart-test-file');
   await saveStream(part, filepath);
   ctx.body = {

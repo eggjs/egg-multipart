@@ -8,6 +8,10 @@ module.exports = app => {
     async async() {
       const ctx = this.ctx;
       const stream = await ctx.getFileStream();
+      if (ctx.query.foo === 'error') {
+        // mock undefined error
+        stream.foo();
+      }
       const name = 'egg-multipart-test/' + process.version + '-' + Date.now() + '-' + path.basename(stream.filename);
       const result = await ctx.oss.put(name, stream);
       ctx.body = {
