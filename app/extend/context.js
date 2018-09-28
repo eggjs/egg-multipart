@@ -9,6 +9,8 @@ class EmptyStream extends Readable {
   }
 }
 
+const HAS_CONSUMED = Symbol('Context#multipartHasConsumed');
+
 module.exports = {
   /**
    * create multipart.parts instance, to get separated files.
@@ -21,6 +23,9 @@ module.exports = {
     if (!this.is('multipart')) {
       this.throw(400, 'Content-Type must be multipart/*');
     }
+    if (this[HAS_CONSUMED]) throw new TypeError('the multipart request can\'t be consumed twice');
+
+    this[HAS_CONSUMED] = true;
     const parseOptions = {};
     Object.assign(parseOptions, this.app.config.multipartParseOptions, options);
     return parse(this, parseOptions);
