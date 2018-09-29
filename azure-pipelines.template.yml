@@ -39,7 +39,7 @@ jobs:
       npm i npminstall && npminstall
     displayName: 'Install Packages'
   - script: |
-      npm run ci
+      npm run ci-windows
     displayName: 'Build & Unit Test'
   - ${{ if ne(parameters.name, 'windows') }}:
     - script: |

@@ -45,7 +45,7 @@
   ],
   "ci": {
     "type": "travis, azure-pipelines",
-    "commands": {
+    "command": {
       "azure-pipelines": "ci-windows"
     },
     "version": "8, 10",
