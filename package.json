@@ -11,11 +11,12 @@
   "main": "index.js",
   "scripts": {
     "autod": "autod",
-    "lint": "eslint . --fix",
-    "test": "npm run lint && npm run test-local",
+    "lint": "eslint .",
+    "test": "npm run lint -- --fix && npm run test-local",
     "test-local": "egg-bin test",
     "cov": "egg-bin cov",
     "ci": "egg-bin pkgfiles && npm run lint && npm run cov",
+    "ci-windows": "egg-bin pkgfiles && npm run lint -- --fix && npm run cov",
     "pkgfiles": "egg-bin pkgfiles"
   },
   "repository": {
@@ -44,6 +45,9 @@
   ],
   "ci": {
     "type": "travis, azure-pipelines",
+    "commands": {
+      "azure-pipelines": "ci-windows"
+    },
     "version": "8, 10",
     "license": {
       "year": 2017
