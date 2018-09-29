@@ -348,4 +348,4 @@ module.exports = class extends Controller {
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/eggjs/egg-multipart/blob/master/LICENSE)
