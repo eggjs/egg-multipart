@@ -2,6 +2,7 @@
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
+[![Build Status](https://dev.azure.com/eggjs/egg/_apis/build/status/eggjs.egg-multipart)](https://dev.azure.com/eggjs/egg/_build/latest?definitionId=8)
 [![Test coverage][codecov-image]][codecov-url]
 [![David deps][david-image]][david-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
