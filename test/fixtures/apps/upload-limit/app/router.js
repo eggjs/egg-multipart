@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const is = require('is-type-of');
 const os = require('os');
-const mkdirp = require('mkdirp');
+const mkdirp = require('mz-modules/mkdirp');
 
 module.exports = app => {
   // mock oss

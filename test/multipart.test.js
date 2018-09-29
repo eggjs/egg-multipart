@@ -128,7 +128,7 @@ describe('test/multipart.test.js', () => {
     it('should not throw 400 when file not speicified', function* () {
       const form = formstream();
       // 模拟用户未选择文件点击了上传，这时 cotroller 是有 file stream 的，因为指定了 MIME application/octet-stream
-      form.buffer('file', new Buffer(''), '', 'application/octet-stream');
+      form.buffer('file', Buffer.from(''), '', 'application/octet-stream');
       const headers = form.headers();
       const res = yield urllib.request(host + '/upload.json', {
         method: 'POST',
@@ -145,7 +145,7 @@ describe('test/multipart.test.js', () => {
       const form = formstream();
       form.field('foo', 'bar');
       // 模拟用户未选择文件点击了上传，这时 cotroller 是有 file stream 的，因为指定了 MIME application/octet-stream
-      // form.buffer('file', new Buffer(''), '', 'application/octet-stream');
+      // form.buffer('file', Buffer.from(''), '', 'application/octet-stream');
       const headers = form.headers();
       const res = yield urllib.request(host + '/upload.json', {
         method: 'POST',
@@ -473,7 +473,7 @@ describe('test/multipart.test.js', () => {
 
     it('should 400 when no file speicified', function* () {
       const form = formstream();
-      form.buffer('file', new Buffer(''), '', 'application/octet-stream');
+      form.buffer('file', Buffer.from(''), '', 'application/octet-stream');
       const headers = form.headers();
       const url = host + '/upload';
       const res = yield urllib.request(url, {
@@ -520,7 +520,7 @@ describe('test/multipart.test.js', () => {
       return app.ready();
     });
     before(function* () {
-      yield fs.writeFile(bigfile, new Buffer(1024 * 1024 * 2));
+      yield fs.writeFile(bigfile, Buffer.alloc(1024 * 1024 * 2));
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
       yield app.httpRequest()

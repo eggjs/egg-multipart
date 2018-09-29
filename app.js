@@ -79,4 +79,17 @@ module.exports = app => {
       }
     },
   };
+
+  options.mode = options.mode || 'stream';
+  if (![ 'stream', 'file' ].includes(options.mode)) {
+    throw new TypeError(`Expect mode to be 'stream' or 'file', but got '${options.mode}'`);
+  }
+
+  app.coreLogger.info('[egg-multipart] %s mode enable', options.mode);
+  if (options.mode === 'file') {
+    app.coreLogger.info('[egg-multipart] will save temporary files to %j, cleanup job cron: %j',
+      options.tmpdir, options.cleanSchedule.cron);
+    // enable multipart middleware
+    app.config.coreMiddleware.push('multipart');
+  }
 };
