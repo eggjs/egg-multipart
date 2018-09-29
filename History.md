@@ -1,4 +1,10 @@
 
+2.2.1 / 2018-09-29
+==================
+
+  * chore: fix egg docs build (#21)
+  * chore: add azure pipelines badge
+
 2.2.0 / 2018-09-29
 ==================
 
