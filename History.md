@@ -1,4 +1,13 @@
 
+2.2.0 / 2018-09-29
+==================
+
+**features**
+  * [[`75c0733`](http://github.com/eggjs/egg-multipart/commit/75c0733bcbb68349970b5d2bb189bf8822954337)] - feat: Provide `file` mode to handle multipart request (#19) (fengmk2 <<fengmk2@gmail.com>>)
+
+**others**
+  * [[`0b4e118`](http://github.com/eggjs/egg-multipart/commit/0b4e118a8eef3e61262fb981999cc2173dc08cc3)] - chore: no need to consume stream on error throw (#18) (fengmk2 <<fengmk2@gmail.com>>)
+
 2.1.0 / 2018-08-07
 ==================
 
