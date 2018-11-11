@@ -123,7 +123,8 @@ The usage very similar to [bodyParser](https://eggjs.org/en/basics/controller.ht
 - `ctx.request.body`: Get all the multipart fields and values, except `file`.
 - `ctx.request.files`: Contains all `file` from the multipart request, it's an Array object.
 
-**WARNING: you should remove the temporary upload file after you use it**
+**WARNING: you should remove the temporary upload files after you use it**,
+the `async ctx.cleanupRequestFiles()` method will be very helpful.
 
 ### Enable `file` mode on config
 
@@ -177,8 +178,8 @@ module.exports = class extends Controller {
       // process file or upload to cloud storage
       result = await ctx.oss.put(name, file.filepath);
     } finally {
-      // need to remove the tmp file
-      await fs.unlink(file.filepath);
+      // need to remove the tmp files
+      await ctx.cleanupRequestFiles();
     }
 
     ctx.body = {
@@ -224,8 +225,8 @@ module.exports = class extends Controller {
         // process file or upload to cloud storage
         result = await ctx.oss.put('egg-multipart-test/' + file.filename, file.filepath);
       } finally {
-        // need to remove the tmp file
-        await fs.unlink(file.filepath);
+        // need to remove the tmp files
+        await ctx.cleanupRequestFiles();
       }
       console.log(result);
     }

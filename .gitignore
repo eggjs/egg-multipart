@@ -4,3 +4,4 @@ node_modules/
 coverage/
 test/fixtures/**/run
 .idea/
+.nyc_output/
