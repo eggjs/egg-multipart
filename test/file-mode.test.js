@@ -289,6 +289,25 @@ describe('test/file-mode.test.js', () => {
     assert(res.data.toString().includes('TypeError: the multipart request can\'t be consumed twice'));
   });
 
+  it('should use cleanupRequestFiles after request end', async () => {
+    const form = formstream();
+    form.field('foo', 'fengmk2').field('love', 'egg');
+    form.file('file2', __filename);
+    // other form fields
+    form.field('work', 'with Node.js');
+
+    const headers = form.headers();
+    const res = await urllib.request(host + '/upload?cleanup=true', {
+      method: 'POST',
+      headers,
+      stream: form,
+    });
+
+    assert(res.status === 200);
+    const data = JSON.parse(res.data);
+    assert(data.files.length === 1);
+  });
+
   describe('schedule/clean_tmpdir', () => {
     it('should remove nothing', async () => {
       app.mockLog();

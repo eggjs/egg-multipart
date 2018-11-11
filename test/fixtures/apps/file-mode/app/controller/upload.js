@@ -6,6 +6,10 @@ module.exports = async ctx => {
     files: ctx.request.files,
   };
 
+  if (ctx.query.cleanup === 'true') {
+    await ctx.cleanupRequestFiles();
+  }
+
   if (ctx.query.call_multipart_twice) {
     ctx.multipart();
   }

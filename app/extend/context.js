@@ -1,5 +1,6 @@
 'use strict';
 
+const rimraf = require('mz-modules/rimraf');
 const parse = require('co-busboy');
 const Readable = require('stream').Readable;
 
@@ -12,6 +13,28 @@ class EmptyStream extends Readable {
 const HAS_CONSUMED = Symbol('Context#multipartHasConsumed');
 
 module.exports = {
+  /**
+   * clean up request tmp files helper
+   * @method Context#cleanupRequestFiles
+   * @param {Array<String>} [files] - file paths need to clenup, default is `ctx.request.files`.
+   */
+  async cleanupRequestFiles(files) {
+    if (!files || !files.length) {
+      files = this.request.files;
+    }
+    if (Array.isArray(files)) {
+      for (const file of files) {
+        try {
+          await rimraf(file.filepath);
+        } catch (err) {
+          // warning log
+          this.coreLogger.warn('[egg-multipart-cleanupRequestFiles-error] file: %j, error: %s',
+            file, err);
+        }
+      }
+    }
+  },
+
   /**
    * create multipart.parts instance, to get separated files.
    * @method Context#multipart

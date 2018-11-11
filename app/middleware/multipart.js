@@ -9,20 +9,7 @@ const sendToWormhole = require('stream-wormhole');
 const moment = require('moment');
 
 module.exports = options => {
-  async function cleanup(requestFiles) {
-    for (const file of requestFiles) {
-      try {
-        await fs.unlink(file.filepath);
-      } catch (_) {
-        // do nothing
-      }
-    }
-  }
-
-  async function limit(requestFiles, code, message) {
-    // cleanup requestFiles
-    await cleanup(requestFiles);
-
+  async function limit(code, message) {
     // throw 413 error
     const err = new Error(message);
     err.code = code;
@@ -44,7 +31,7 @@ module.exports = options => {
       try {
         part = await parts();
       } catch (err) {
-        await cleanup(requestFiles);
+        await ctx.cleanupRequestFiles(requestFiles);
         throw err;
       }
 
@@ -55,10 +42,12 @@ module.exports = options => {
         const fieldnameTruncated = part[2];
         const valueTruncated = part[3];
         if (valueTruncated) {
-          return await limit(requestFiles, 'Request_fieldSize_limit', 'Reach fieldSize limit');
+          await ctx.cleanupRequestFiles(requestFiles);
+          return await limit('Request_fieldSize_limit', 'Reach fieldSize limit');
         }
         if (fieldnameTruncated) {
-          return await limit(requestFiles, 'Request_fieldNameSize_limit', 'Reach fieldNameSize limit');
+          await ctx.cleanupRequestFiles(requestFiles);
+          return await limit('Request_fieldNameSize_limit', 'Reach fieldNameSize limit');
         }
 
         // arrays are busboy fields
@@ -97,7 +86,8 @@ module.exports = options => {
 
       // https://github.com/mscdex/busboy/blob/master/lib/types/multipart.js#L221
       if (part.truncated) {
-        return await limit(requestFiles, 'Request_fileSize_limit', 'Reach fileSize limit');
+        await ctx.cleanupRequestFiles(requestFiles);
+        return await limit('Request_fileSize_limit', 'Reach fileSize limit');
       }
     } while (part != null);
 
