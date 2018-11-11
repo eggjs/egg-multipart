@@ -1,4 +1,10 @@
 
+2.3.0 / 2018-11-11
+==================
+
+**features**
+  * [[`8d63cea`](http://github.com/eggjs/egg-multipart/commit/8d63cea48134d4d2a69796a399f04117222efd70)] - feat: export ctx.cleanupRequestFiles to improve cleanup more easy (#22) (fengmk2 <<fengmk2@gmail.com>>)
+
 2.2.1 / 2018-09-29
 ==================
 
