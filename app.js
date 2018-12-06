@@ -70,6 +70,7 @@ module.exports = app => {
       try {
         if (!checkExt(filename)) {
           const err = new Error('Invalid filename: ' + filename);
+          err.name = 'MultipartFileInvalidFilenameError';
           err.status = 400;
           return err;
         }
