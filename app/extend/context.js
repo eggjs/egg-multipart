@@ -65,12 +65,14 @@ module.exports = {
    * @method Context#getFileStream
    * @param {Object} options
    *  - {Boolean} options.requireFile - required file submit, default is true
+   *  - {Object} options.multipart - override default multipart configurations
    * @return {ReadStream} stream
    * @since 1.0.0
    */
   async getFileStream(options) {
     options = options || {};
-    const parts = this.multipart({ autoFields: true });
+    options.multipart = options.multipart || {};
+    const parts = this.multipart(Object.assign({ autoFields: true, options.multipart }));
     let stream = await parts();
 
     if (options.requireFile !== false) {
