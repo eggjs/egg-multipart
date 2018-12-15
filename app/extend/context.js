@@ -3,6 +3,7 @@
 const rimraf = require('mz-modules/rimraf');
 const parse = require('co-busboy');
 const Readable = require('stream').Readable;
+const deepmerge = require('deepmerge')
 
 class EmptyStream extends Readable {
   _read() {
@@ -50,7 +51,7 @@ module.exports = {
 
     this[HAS_CONSUMED] = true;
     const parseOptions = {};
-    Object.assign(parseOptions, this.app.config.multipartParseOptions, options);
+    deepmerge.all([parseOptions, this.app.config.multipartParseOptions, options]);
     return parse(this, parseOptions);
   },
 
