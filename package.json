@@ -55,6 +55,7 @@
   },
   "dependencies": {
     "co-busboy": "^1.4.0",
+    "deepmerge": "^3.0.0",
     "humanize-bytes": "^1.0.1",
     "moment": "^2.22.2",
     "mz": "^2.7.0",
