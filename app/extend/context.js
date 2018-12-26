@@ -39,6 +39,10 @@ module.exports = {
    * create multipart.parts instance, to get separated files.
    * @method Context#multipart
    * @param {Object} [options] - override default multipart configurations
+   *  - {Boolean} options.autoFields
+   *  - {String} options.defCharset
+   *  - {Object} options.limits
+   *  - {Function} options.checkFile
    * @return {Yieldable} parts
    */
   multipart(options) {
@@ -49,8 +53,13 @@ module.exports = {
     if (this[HAS_CONSUMED]) throw new TypeError('the multipart request can\'t be consumed twice');
 
     this[HAS_CONSUMED] = true;
-    const parseOptions = {};
-    Object.assign(parseOptions, this.app.config.multipartParseOptions, options);
+    const parseOptions = Object.assign({}, this.app.config.multipartParseOptions);
+    options = options || {};
+    if (typeof options.autoFields === 'boolean') parseOptions.autoFields = options.autoFields;
+    if (options.defCharset) parseOptions.defCharset = options.defCharset;
+    if (options.checkFile) parseOptions.checkFile = options.checkFile;
+    // merge and create a new limits object
+    if (options.limits) parseOptions.limits = Object.assign({}, parseOptions.limits, options.limits);
     return parse(this, parseOptions);
   },
 
@@ -65,12 +74,21 @@ module.exports = {
    * @method Context#getFileStream
    * @param {Object} options
    *  - {Boolean} options.requireFile - required file submit, default is true
+   *  - {String} options.defCharset
+   *  - {Object} options.limits
+   *  - {Function} options.checkFile
    * @return {ReadStream} stream
    * @since 1.0.0
    */
   async getFileStream(options) {
     options = options || {};
-    const parts = this.multipart({ autoFields: true });
+    const multipartOptions = {
+      autoFields: true,
+    };
+    if (options.defCharset) multipartOptions.defCharset = options.defCharset;
+    if (options.limits) multipartOptions.limits = options.limits;
+    if (options.checkFile) multipartOptions.checkFile = options.checkFile;
+    const parts = this.multipart(multipartOptions);
     let stream = await parts();
 
     if (options.requireFile !== false) {

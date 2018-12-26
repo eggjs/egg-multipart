@@ -421,8 +421,8 @@ describe('test/multipart.test.js', () => {
         dataType: 'json',
       });
 
-      assert(res.status === 200);
       const data = res.data;
+      assert(res.status === 200);
       assert(data.status === 200);
       assert(typeof data.name === 'string');
       assert(data.url.includes('http://mockoss.com/egg-multipart-test/'));
@@ -505,6 +505,25 @@ describe('test/multipart.test.js', () => {
         assert(data.message === 'stream.foo is not a function');
         yield sleep(100);
       }
+    });
+
+    it('should file hit limits fileSize', function* () {
+      const form = formstream();
+      form.buffer('file', Buffer.alloc(1024 * 1024 * 100), 'foo.js');
+
+      const headers = form.headers();
+      const url = host + '/upload/async?fileSize=100000';
+      const result = yield urllib.request(url, {
+        method: 'POST',
+        headers,
+        stream: form,
+        dataType: 'json',
+        agent,
+      });
+
+      assert(result.status === 413);
+      const data = result.data;
+      assert(data.message === 'Request file too large');
     });
   });
 
