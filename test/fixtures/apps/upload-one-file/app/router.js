@@ -3,20 +3,24 @@
 const path = require('path');
 const fs = require('fs');
 const is = require('is-type-of');
+const pump = require('mz-modules/pump');
+const mkdirp = require('mz-modules/mkdirp');
 
 module.exports = app => {
   // mock oss
   app.context.oss = {
-    put(name) {
-      return new Promise(resolve => {
-        resolve({
-          name,
-          url: 'http://mockoss.com/' + name,
-          res: {
-            status: 200,
-          },
-        });
-      });
+    async put(name, stream) {
+      const tmpfile = path.join(app.config.baseDir, 'run', Date.now() + name);
+      await mkdirp(path.dirname(tmpfile));
+      const writeStream = fs.createWriteStream(tmpfile);
+      await pump(stream, writeStream);
+      return {
+        name,
+        url: 'http://mockoss.com/' + name,
+        res: {
+          status: 200,
+        },
+      };
     },
   };
 

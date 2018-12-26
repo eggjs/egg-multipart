@@ -7,7 +7,11 @@ module.exports = app => {
   return class UploadController extends app.Controller {
     async async() {
       const ctx = this.ctx;
-      const stream = await ctx.getFileStream();
+      const options = {};
+      if (ctx.query.fileSize) {
+        options.limits = { fileSize: parseInt(ctx.query.fileSize) };
+      }
+      const stream = await ctx.getFileStream(options);
       if (ctx.query.foo === 'error') {
         // mock undefined error
         stream.foo();
