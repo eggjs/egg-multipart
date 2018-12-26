@@ -1,4 +1,10 @@
 
+2.4.0 / 2018-12-26
+==================
+
+**features**
+  * [[`d7504b9`](http://github.com/eggjs/egg-multipart/commit/d7504b9635c68184181c751212c30a6eb53f87fe)] - feat: custom multipart parse options per request (#27) (fengmk2 <<fengmk2@gmail.com>>)
+
 2.3.0 / 2018-11-11
 ==================
 
