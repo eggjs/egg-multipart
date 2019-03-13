@@ -1,3 +1,4 @@
+import 'egg';
 interface EggFile {
   field: string;
   filename: string;
@@ -8,6 +9,9 @@ interface EggFile {
 
 declare module 'egg' {
   interface Request {
+    /**
+     * Files Object Array
+     */
     files: EggFile[];
   }
 }
