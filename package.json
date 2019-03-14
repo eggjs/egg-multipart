@@ -41,8 +41,10 @@
   "files": [
     "app",
     "config",
-    "app.js"
+    "app.js",
+    "index.d.ts"
   ],
+  "types": "index.d.ts",
   "ci": {
     "type": "travis, azure-pipelines",
     "command": {
@@ -63,7 +65,9 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "@types/node": "^11.11.3",
     "autod": "^3.0.1",
+    "coffee": "^5.2.1",
     "egg": "^2.11.2",
     "egg-bin": "^4.9.0",
     "egg-ci": "^1.9.2",
