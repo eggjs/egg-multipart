@@ -327,10 +327,17 @@ describe('test/file-mode.test.js', () => {
       ];
       const shouldKeepDirs = [
         path.join(app.config.multipart.tmpdir, moment().subtract(2, 'years').format('YYYY/MM/DD/HH')),
-        path.join(app.config.multipart.tmpdir, moment().subtract(4, 'months').format('YYYY/MM/DD/HH')),
         path.join(app.config.multipart.tmpdir, moment().subtract(8, 'days').format('YYYY/MM/DD/HH')),
         path.join(app.config.multipart.tmpdir, moment().format('YYYY/MM/DD/HH')),
       ];
+      const currentMonth = new Date().getMonth();
+      const fourMonthBefore = path.join(app.config.multipart.tmpdir, moment().subtract(4, 'months').format('YYYY/MM/DD/HH'));
+      if (currentMonth < 4) {
+        // if current month is less than April, four months before shoule be last year.
+        oldDirs.push(fourMonthBefore);
+      } else {
+        shouldKeepDirs.push(fourMonthBefore);
+      }
       await Promise.all(oldDirs.map(dir => mkdirp(dir)));
       await Promise.all(shouldKeepDirs.map(dir => mkdirp(dir)));
 
