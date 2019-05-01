@@ -1,4 +1,13 @@
 
+2.5.0 / 2019-05-01
+==================
+
+**features**
+  * [[`33c6b52`](http://github.com/eggjs/egg-multipart/commit/33c6b52fcd7cc4674cc2ff51dfe849adf078ad5c)] - feat(types): typescript support (#28) (George <<main.lukai@gmail.com>>)
+
+**others**
+  * [[`6be344f`](http://github.com/eggjs/egg-multipart/commit/6be344fd7cdaa04c8e0861f5295244c8a85d14e8)] - test: fix schedule task test case (#29) (George <<main.lukai@gmail.com>>)
+
 2.4.0 / 2018-12-26
 ==================
 
