@@ -309,6 +309,13 @@ describe('test/file-mode.test.js', () => {
   });
 
   describe('schedule/clean_tmpdir', () => {
+    it('should register clean_tmpdir schedule', () => {
+      // [egg-schedule]: register schedule /hello/egg-multipart/app/schedule/clean_tmpdir.js
+      const logger = app.loggers.scheduleLogger;
+      const content = fs.readFileSync(logger.options.file, 'utf8');
+      assert(/\[egg-schedule\]: register schedule .+clean_tmpdir\.js/.test(content));
+    });
+
     it('should remove nothing', async () => {
       app.mockLog();
       await app.runSchedule(path.join(__dirname, '../app/schedule/clean_tmpdir'));

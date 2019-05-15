@@ -4,6 +4,7 @@ const assert = require('assert');
 const formstream = require('formstream');
 const urllib = require('urllib');
 const path = require('path');
+const fs = require('fs');
 const mock = require('egg-mock');
 const rimraf = require('mz-modules/rimraf');
 
@@ -91,5 +92,12 @@ describe('test/stream-mode-with-filematch.test.js', () => {
     assert(res.status === 200);
     const data = JSON.parse(res.data);
     assert.deepStrictEqual(data, { body: {} });
+  });
+
+  it('should register clean_tmpdir schedule', () => {
+    // [egg-schedule]: register schedule /hello/egg-multipart/app/schedule/clean_tmpdir.js
+    const logger = app.loggers.scheduleLogger;
+    const content = fs.readFileSync(logger.options.file, 'utf8');
+    assert(/\[egg-schedule\]: register schedule .+clean_tmpdir\.js/.test(content));
   });
 });
