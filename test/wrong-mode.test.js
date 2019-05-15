@@ -38,7 +38,6 @@ describe('test/wrong-mode.test.js', () => {
       .then(() => {
         throw new Error('should not run this');
       }, err => {
-        assert(err.name === 'AssertionError');
         assert(err.message === '`fileModeMatch` options should be an instance of RegExp');
       });
   });
