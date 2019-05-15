@@ -29,4 +29,17 @@ describe('test/wrong-mode.test.js', () => {
         assert(err.message === '`fileModeMatch` options only work on stream mode, please remove it');
       });
   });
+
+  it('should start fail when using options.fileModeMatch is not RegExp', () => {
+    const app = mock.app({
+      baseDir: 'apps/wrong-fileModeMatch-value',
+    });
+    return app.ready()
+      .then(() => {
+        throw new Error('should not run this');
+      }, err => {
+        assert(err.name === 'AssertionError');
+        assert(err.message === '`fileModeMatch` options should be an instance of RegExp');
+      });
+  });
 });
