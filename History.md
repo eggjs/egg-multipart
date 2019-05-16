@@ -1,4 +1,10 @@
 
+2.6.1 / 2019-05-16
+==================
+
+**others**
+  * [[`c5c4308`](http://github.com/eggjs/egg-multipart/commit/c5c43080df4c203c23053398390cfee25dc60542)] - chore: add typings and jsdocs (#31) (TZ | 天猪 <<atian25@qq.com>>)
+
 2.6.0 / 2019-05-16
 ==================
 
