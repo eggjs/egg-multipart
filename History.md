@@ -1,4 +1,10 @@
 
+2.6.0 / 2019-05-16
+==================
+
+**features**
+  * [[`7eb534f`](http://github.com/eggjs/egg-multipart/commit/7eb534f3b2cdb44fda025cf831877b8be7e84b55)] - feat: support file mode on default stream mode (#30) (fengmk2 <<fengmk2@gmail.com>>)
+
 2.5.0 / 2019-05-01
 ==================
 
