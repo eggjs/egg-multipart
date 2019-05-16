@@ -33,6 +33,21 @@ describe('test/multipart.test.js', () => {
     beforeEach(() => app.mockCsrf());
     afterEach(mock.restore);
 
+    it('should not has clean_tmpdir schedule', async () => {
+      try {
+        await app.runSchedule('clean_tmpdir');
+        throw new Error('should not run this');
+      } catch (err) {
+        assert(err.message === '[egg-schedule] Cannot find schedule clean_tmpdir');
+      }
+    });
+
+    it('should not register clean_tmpdir schedule', () => {
+      const logger = app.loggers.scheduleLogger;
+      const content = fs.readFileSync(logger.options.file, 'utf8');
+      assert(!/\[egg-schedule\]: register schedule .+clean_tmpdir\.js/.test(content));
+    });
+
     it('should upload with csrf', function* () {
       const form = formstream();
       // form.file('file', filepath, filename);

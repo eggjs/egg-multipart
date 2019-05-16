@@ -15,7 +15,7 @@ const HAS_CONSUMED = Symbol('Context#multipartHasConsumed');
 module.exports = {
   /**
    * clean up request tmp files helper
-   * @method Context#cleanupRequestFiles
+   * @function Context#cleanupRequestFiles
    * @param {Array<String>} [files] - file paths need to clenup, default is `ctx.request.files`.
    */
   async cleanupRequestFiles(files) {
@@ -37,7 +37,7 @@ module.exports = {
 
   /**
    * create multipart.parts instance, to get separated files.
-   * @method Context#multipart
+   * @function Context#multipart
    * @param {Object} [options] - override default multipart configurations
    *  - {Boolean} options.autoFields
    *  - {String} options.defCharset
@@ -71,7 +71,7 @@ module.exports = {
    * // get other fields
    * console.log(stream.fields);
    * ```
-   * @method Context#getFileStream
+   * @function Context#getFileStream
    * @param {Object} options
    *  - {Boolean} options.requireFile - required file submit, default is true
    *  - {String} options.defCharset

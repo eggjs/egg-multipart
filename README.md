@@ -347,6 +347,20 @@ module.exports = class extends Controller {
 };
 ```
 
+### Support `file` and `stream` mode in the same time
+
+If the default `mode` is `stream`, use the `fileModeMatch` options to match the request urls switch to `file` mode.
+
+```js
+config.multipart = {
+  mode: 'stream',
+  // let POST /upload_file request use the file mode, other requests use the stream mode.
+  fileModeMatch: /^\/upload_file$/,
+};
+```
+
+NOTICE: `fileModeMatch` options only work on `stream` mode.
+
 ## License
 
 [MIT](https://github.com/eggjs/egg-multipart/blob/master/LICENSE)

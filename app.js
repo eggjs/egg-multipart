@@ -1,7 +1,8 @@
 'use strict';
 
-const bytes = require('humanize-bytes');
+const assert = require('assert');
 const path = require('path');
+const bytes = require('humanize-bytes');
 
 module.exports = app => {
   const options = app.config.multipart;
@@ -87,6 +88,13 @@ module.exports = app => {
 
   app.coreLogger.info('[egg-multipart] %s mode enable', options.mode);
   if (options.mode === 'file') {
+    if (options.fileModeMatch) throw new TypeError('`fileModeMatch` options only work on stream mode, please remove it');
+    app.coreLogger.info('[egg-multipart] will save temporary files to %j, cleanup job cron: %j',
+      options.tmpdir, options.cleanSchedule.cron);
+    // enable multipart middleware
+    app.config.coreMiddleware.push('multipart');
+  } else if (options.fileModeMatch) {
+    assert(options.fileModeMatch instanceof RegExp, '`fileModeMatch` options should be an instance of RegExp');
     app.coreLogger.info('[egg-multipart] will save temporary files to %j, cleanup job cron: %j',
       options.tmpdir, options.cleanSchedule.cron);
     // enable multipart middleware
