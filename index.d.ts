@@ -98,6 +98,7 @@ declare module 'egg' {
   interface EggAppConfig {
     multipart: {
       mode?: string;
+      fileModeMatch?: RegExp;
       autoFields?: boolean;
       defaultCharset?: string;
       fieldNameSize?: number;

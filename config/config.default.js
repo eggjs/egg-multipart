@@ -12,6 +12,7 @@ module.exports = appInfo => {
    * @property {String} mode - which mode to handle multipart request, default is `stream`, the hard way.
    *   If set mode to `file`, it's the easy way to handle multipart request and save it to local files.
    *   If you don't know the Node.js Stream work, maybe you should use the `file` mode to get started.
+   * @property {RegExp} fileModeMatch - special url to use file mode when global `mode` is `stream`.
    * @property {Boolean} autoFields - Auto set fields to parts, default is `false`. Only work on `stream` mode.
    *   If set true，all fields will be auto handle and can acces by `parts.fields`
    * @property {String} defaultCharset - Default charset encoding, don't change it before you real know about it
