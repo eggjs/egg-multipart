@@ -1,4 +1,10 @@
 
+2.6.2 / 2019-05-19
+==================
+
+**fixes**
+  * [[`72b03aa`](http://github.com/eggjs/egg-multipart/commit/72b03aae2ef18bef7f8d0a71c323f072c567f8d5)] - fix: keep same metas as file stream on file mode (#32) (fengmk2 <<fengmk2@gmail.com>>)
+
 2.6.1 / 2019-05-16
 ==================
 
