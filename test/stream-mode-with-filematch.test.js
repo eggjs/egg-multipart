@@ -94,6 +94,59 @@ describe('test/stream-mode-with-filematch.test.js', () => {
     assert.deepStrictEqual(data, { body: {} });
   });
 
+  it('should allow to call saveRequestFiles on controller', async () => {
+    const form = formstream();
+    form.field('foo', 'fengmk2').field('love', 'egg');
+    form.file('file1', __filename, 'foooooooo.js');
+    form.file('file2', __filename);
+    // will ignore empty file
+    form.buffer('file3', Buffer.from(''), '', 'application/octet-stream');
+    form.file('bigfile', path.join(__dirname, 'fixtures', 'bigfile.js'));
+    // other form fields
+    form.field('work', 'with Node.js');
+
+    const headers = form.headers();
+    const res = await urllib.request(host + '/save', {
+      method: 'POST',
+      headers,
+      stream: form,
+    });
+
+    assert(res.status === 200);
+    const data = JSON.parse(res.data);
+    assert.deepStrictEqual(data.body, { foo: 'fengmk2', love: 'egg', work: 'with Node.js' });
+    assert(data.files.length === 3);
+    assert(data.files[0].field === 'file1');
+    assert(data.files[0].filename === 'foooooooo.js');
+    assert(data.files[0].encoding === '7bit');
+    assert(data.files[0].mime === 'application/javascript');
+    assert(data.files[0].filepath.startsWith(app.config.multipart.tmpdir));
+
+    assert(data.files[1].field === 'file2');
+    assert(data.files[1].filename === 'stream-mode-with-filematch.test.js');
+    assert(data.files[1].encoding === '7bit');
+    assert(data.files[1].mime === 'application/javascript');
+    assert(data.files[1].filepath.startsWith(app.config.multipart.tmpdir));
+
+    assert(data.files[2].field === 'bigfile');
+    assert(data.files[2].filename === 'bigfile.js');
+    assert(data.files[2].encoding === '7bit');
+    assert(data.files[2].mime === 'application/javascript');
+    assert(data.files[2].filepath.startsWith(app.config.multipart.tmpdir));
+  });
+
+  it('should 400 when request is not multipart', async () => {
+    const res = await urllib.request(host + '/save', {
+      method: 'POST',
+      data: { foo: 'bar' },
+      dataType: 'json',
+    });
+    assert(res.status === 400);
+    assert.deepStrictEqual(res.data, {
+      message: 'Content-Type must be multipart/*',
+    });
+  });
+
   it('should register clean_tmpdir schedule', () => {
     // [egg-schedule]: register schedule /hello/egg-multipart/app/schedule/clean_tmpdir.js
     const logger = app.loggers.scheduleLogger;

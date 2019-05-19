@@ -42,10 +42,10 @@ describe('test/multipart.test.js', () => {
       }
     });
 
-    it('should not register clean_tmpdir schedule', () => {
+    it('should alway register clean_tmpdir schedule in stream mode', () => {
       const logger = app.loggers.scheduleLogger;
       const content = fs.readFileSync(logger.options.file, 'utf8');
-      assert(!/\[egg-schedule\]: register schedule .+clean_tmpdir\.js/.test(content));
+      assert(/\[egg-schedule\]: register schedule .+clean_tmpdir\.js/.test(content));
     });
 
     it('should upload with csrf', function* () {
