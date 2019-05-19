@@ -63,6 +63,12 @@ module.exports = options => {
         encoding: part.encoding,
         mime: part.mime,
       };
+      // keep save property name as file stream
+      // https://github.com/cojs/busboy/blob/master/index.js#L114
+      meta.fieldname = meta.field;
+      meta.transferEncoding = meta.encoding;
+      meta.mimeType = meta.mime;
+
       ctx.coreLogger.debug('[egg-multipart:storeMultipart] handle stream part: %j', meta);
       // empty part, ignore it
       if (!part.filename) {
