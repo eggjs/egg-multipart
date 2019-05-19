@@ -77,9 +77,12 @@ describe('test/file-mode.test.js', () => {
     assert(data.files[0].filepath.startsWith(app.config.multipart.tmpdir));
 
     assert(data.files[1].field === 'file2');
+    assert(data.files[1].fieldname === 'file2');
     assert(data.files[1].filename === 'file-mode.test.js');
     assert(data.files[1].encoding === '7bit');
+    assert(data.files[1].transferEncoding === '7bit');
     assert(data.files[1].mime === 'application/javascript');
+    assert(data.files[1].mimeType === 'application/javascript');
     assert(data.files[1].filepath.startsWith(app.config.multipart.tmpdir));
 
     assert(data.files[2].field === 'bigfile');
