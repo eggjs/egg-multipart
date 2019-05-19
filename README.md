@@ -178,8 +178,11 @@ module.exports = class extends Controller {
       // process file or upload to cloud storage
       result = await ctx.oss.put(name, file.filepath);
     } finally {
-      // need to remove the tmp files
-      await ctx.cleanupRequestFiles();
+      // remove tmp files and don't block the request's response
+      // cleanupRequestFiles won't throw error even remove file io error happen
+      ctx.cleanupRequestFiles();
+      // remove tmp files before send response
+      // await ctx.cleanupRequestFiles();
     }
 
     ctx.body = {
