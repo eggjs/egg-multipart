@@ -311,6 +311,25 @@ describe('test/file-mode.test.js', () => {
     assert(data.files.length === 1);
   });
 
+  it('should use cleanupRequestFiles in async way', async () => {
+    const form = formstream();
+    form.field('foo', 'fengmk2').field('love', 'egg');
+    form.file('file2', __filename);
+    // other form fields
+    form.field('work', 'with Node.js');
+
+    const headers = form.headers();
+    const res = await urllib.request(host + '/upload?async_cleanup=true', {
+      method: 'POST',
+      headers,
+      stream: form,
+    });
+
+    assert(res.status === 200);
+    const data = JSON.parse(res.data);
+    assert(data.files.length === 1);
+  });
+
   describe('schedule/clean_tmpdir', () => {
     it('should register clean_tmpdir schedule', () => {
       // [egg-schedule]: register schedule /hello/egg-multipart/app/schedule/clean_tmpdir.js

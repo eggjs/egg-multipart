@@ -9,6 +9,9 @@ module.exports = async ctx => {
   if (ctx.query.cleanup === 'true') {
     await ctx.cleanupRequestFiles();
   }
+  if (ctx.query.async_cleanup === 'true') {
+    ctx.cleanupRequestFiles();
+  }
 
   if (ctx.query.call_multipart_twice) {
     ctx.multipart();
