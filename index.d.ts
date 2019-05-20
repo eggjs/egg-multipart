@@ -31,19 +31,12 @@ interface MultipartOptions {
 
 interface MultipartFileStream extends Readable {
   fields: any;
-
   filename: string;
-
   fieldname: string;
-
   mime: string;
-
   mimeType: string;
-
   transferEncoding: string;
-
   encoding: string;
-
   truncated: boolean;
 }
 
@@ -73,6 +66,12 @@ declare module 'egg' {
     cleanupRequestFiles(files?: EggFile[]): Promise<void>;
 
     /**
+     * save request multipart data and files to `ctx.request`
+     * @return {Promise<void>}
+     */
+    saveRequestFiles(): Promise<void>;
+
+    /**
      * create multipart.parts instance, to get separated files.
      * @param {MultipartOptions} options
      * @return {Function} return a function which return a Promise
@@ -85,7 +84,6 @@ declare module 'egg' {
      * @return {Promise<MultipartFileStream>}
      */
     getFileStream(options?: MultipartOptions): Promise<MultipartFileStream>
-
   }
 
   interface Request {
