@@ -12,8 +12,6 @@ module.exports = app => {
         type: 'worker',
         cron: app.config.multipart.cleanSchedule.cron,
         immediate: false,
-        // disable on stream mode and not set fileModeMatch
-        disable: app.config.multipart.mode === 'stream' && !app.config.multipart.fileModeMatch,
       };
     }
 

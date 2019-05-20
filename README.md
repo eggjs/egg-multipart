@@ -228,8 +228,9 @@ module.exports = class extends Controller {
         // process file or upload to cloud storage
         result = await ctx.oss.put('egg-multipart-test/' + file.filename, file.filepath);
       } finally {
-        // need to remove the tmp files
-        await ctx.cleanupRequestFiles();
+        // remove tmp files and don't block the request's response
+        // cleanupRequestFiles won't throw error even remove file io error happen
+        ctx.cleanupRequestFiles();
       }
       console.log(result);
     }
