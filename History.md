@@ -1,4 +1,13 @@
 
+2.7.0 / 2019-05-20
+==================
+
+**features**
+  * [[`0d26aa0`](http://github.com/eggjs/egg-multipart/commit/0d26aa0862279eac15cf72281a90ccf77731e3d6)] - feat: export saveRequestFiles to context (#34) (fengmk2 <<fengmk2@gmail.com>>)
+
+**others**
+  * [[`c5ca3ea`](http://github.com/eggjs/egg-multipart/commit/c5ca3ea2a46708744bb884f67fafee9bc1606df1)] - chore: remove tmp files and don't block the request's response (#33) (fengmk2 <<fengmk2@gmail.com>>)
+
 2.6.2 / 2019-05-19
 ==================
 
