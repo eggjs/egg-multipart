@@ -50,6 +50,10 @@ module.exports = {
     }
   },
 
+  /**
+   * save request multipart data and files to `ctx.request`
+   * @function Context#saveRequestFiles
+   */
   async saveRequestFiles() {
     const ctx = this;
     let storedir;
