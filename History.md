@@ -1,4 +1,10 @@
 
+2.7.1 / 2019-05-22
+==================
+
+**fixes**
+  * [[`75b1d48`](http://github.com/eggjs/egg-multipart/commit/75b1d48079b3c6b1358bf75197af0c8164ac926a)] - fix: whitelist declaration(#35) (Stephen <<stephenseraph@gmail.com>>)
+
 2.7.0 / 2019-05-20
 ==================
 
