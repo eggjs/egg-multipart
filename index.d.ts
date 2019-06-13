@@ -93,10 +93,12 @@ declare module 'egg' {
     files: EggFile[];
   }
 
+  type MatchItem = string | RegExp | ((ctx: Context) => boolean);
+
   interface EggAppConfig {
     multipart: {
       mode?: string;
-      fileModeMatch?: RegExp;
+      fileModeMatch?: MatchItem | MatchItem[];
       autoFields?: boolean;
       defaultCharset?: string;
       fieldNameSize?: number;
