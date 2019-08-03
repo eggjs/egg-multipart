@@ -1,4 +1,10 @@
 
+2.8.0 / 2019-08-03
+==================
+
+**features**
+  * [[`5d3ee0f`](http://github.com/eggjs/egg-multipart/commit/5d3ee0f1b82ba705f8bac0468cb19ab6f1dce8ab)] - feat: saveRequestFiles support options (#37) (仙森 <<dapixp@gmail.com>>)
+
 2.7.1 / 2019-05-22
 ==================
 
