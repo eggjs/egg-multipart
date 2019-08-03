@@ -11,7 +11,7 @@ module.exports = (app) => {
         });
         ctx.body = file;
       } finally {
-        ctx.cleanupRequestFiles();
+        await ctx.cleanupRequestFiles();
       }
     };
   }

@@ -356,7 +356,6 @@ describe('test/file-mode.test.js', () => {
       ];
       const shouldKeepDirs = [
         path.join(app.config.multipart.tmpdir, moment().subtract(2, 'years').format('YYYY/MM/DD/HH')),
-        path.join(app.config.multipart.tmpdir, moment().subtract(8, 'days').format('YYYY/MM/DD/HH')),
         path.join(app.config.multipart.tmpdir, moment().format('YYYY/MM/DD/HH')),
       ];
       const currentMonth = new Date().getMonth();
