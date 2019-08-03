@@ -53,15 +53,28 @@ module.exports = {
   /**
    * save request multipart data and files to `ctx.request`
    * @function Context#saveRequestFiles
+   * @param {Object} options
+   *  - {String} options.defCharset
+   *  - {Object} options.limits
+   *  - {Function} options.checkFile
    */
-  async saveRequestFiles() {
+  async saveRequestFiles(options) {
+    options = options || {};
     const ctx = this;
+
+    const multipartOptions = {
+      autoFields: false,
+    };
+    if (options.defCharset) multipartOptions.defCharset = options.defCharset;
+    if (options.limits) multipartOptions.limits = options.limits;
+    if (options.checkFile) multipartOptions.checkFile = options.checkFile;
+
     let storedir;
 
     const requestBody = {};
     const requestFiles = [];
 
-    const parts = ctx.multipart({ autoFields: false });
+    const parts = ctx.multipart(multipartOptions);
     let part;
     do {
       try {
