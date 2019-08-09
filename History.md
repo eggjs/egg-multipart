@@ -1,4 +1,10 @@
 
+2.9.0 / 2019-08-09
+==================
+
+**features**
+  * [[`a1fcdab`](http://github.com/eggjs/egg-multipart/commit/a1fcdab00ef1113845bbe41a4c0b40ce9356cc94)] - feat: fileModeMatch support glob with egg-path-matching (#36) (TZ | 天猪 <<atian25@qq.com>>)
+
 2.8.0 / 2019-08-03
 ==================
 
