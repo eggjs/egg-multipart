@@ -360,6 +360,8 @@ config.multipart = {
   mode: 'stream',
   // let POST /upload_file request use the file mode, other requests use the stream mode.
   fileModeMatch: /^\/upload_file$/,
+  // or glob
+  // fileModeMatch: '/upload_file',
 };
 ```
 

@@ -1,6 +1,5 @@
 'use strict';
 
-const assert = require('assert');
 const path = require('path');
 const bytes = require('humanize-bytes');
 
@@ -94,7 +93,6 @@ module.exports = app => {
     // enable multipart middleware
     app.config.coreMiddleware.push('multipart');
   } else if (options.fileModeMatch) {
-    assert(options.fileModeMatch instanceof RegExp, '`fileModeMatch` options should be an instance of RegExp');
     app.coreLogger.info('[egg-multipart] will save temporary files to %j, cleanup job cron: %j',
       options.tmpdir, options.cleanSchedule.cron);
     // enable multipart middleware
