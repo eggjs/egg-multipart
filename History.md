@@ -1,4 +1,10 @@
 
+2.9.1 / 2019-11-07
+==================
+
+**fixes**
+  * [[`27464f3`](http://github.com/eggjs/egg-multipart/commit/27464f3b954b31005f042084a95cbfbac5dcf9a4)] - fix: add more error message (#38) (TZ | 天猪 <<atian25@qq.com>>)
+
 2.9.0 / 2019-08-09
 ==================
 
