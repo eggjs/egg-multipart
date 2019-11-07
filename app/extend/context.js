@@ -218,7 +218,7 @@ module.exports = {
     }
     stream.fields = parts.field;
     stream.once('limit', () => {
-      const err = new Error('Request file too large');
+      const err = new Error('Request file too large, please check multipart config');
       err.name = 'MultipartFileTooLargeError';
       err.status = 413;
       err.fields = stream.fields;
