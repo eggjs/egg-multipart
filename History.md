@@ -1,4 +1,10 @@
 
+2.10.0 / 2019-12-11
+==================
+
+**features**
+  * [[`21ded55`](http://github.com/eggjs/egg-multipart/commit/21ded553420c383bf854a7e3374b0c5bb8c18581)] - feat: compatibility without dot at fileExtensions (#39) (TZ | 天猪 <<atian25@qq.com>>)
+
 2.9.1 / 2019-11-07
 ==================
 
