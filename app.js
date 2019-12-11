@@ -19,6 +19,10 @@ module.exports = app => {
     options.whitelist = options.whitelist.map(extname => extname.toLowerCase());
     checkExt = filename => options.whitelist.includes(path.extname(filename).toLowerCase());
   } else {
+    const fileExtensions = (options.fileExtensions || []).map(extname => {
+      return extname.startsWith('.') ? extname : `.${extname}`;
+    });
+
     // default extname whitelist
     const whitelist = [
       // images
@@ -45,7 +49,7 @@ module.exports = app => {
       '.mp4',
       '.avi',
     ]
-      .concat(options.fileExtensions || [])
+      .concat(fileExtensions)
       .map(extname => extname.toLowerCase());
 
     checkExt = filename => whitelist.includes(path.extname(filename).toLowerCase());
