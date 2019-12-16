@@ -1,4 +1,10 @@
 
+2.10.1 / 2019-12-16
+==================
+
+**fixes**
+  * [[`3451864`](http://github.com/eggjs/egg-multipart/commit/34518642562b8712040220090ee5828583a2fdcf)] - fix: support extname not speicified (#40) (刘涛 <<liutaofe@gmail.com>>)
+
 2.10.0 / 2019-12-11
 ==================
 
