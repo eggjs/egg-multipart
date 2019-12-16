@@ -218,6 +218,21 @@ describe('test/multipart.test.js', () => {
       assert(data.filename === 'bar.abc');
     });
 
+    it('should upload when extname is not speicified', function* () {
+      const form = formstream();
+      form.file('file', __filename, 'bar');
+      const headers = form.headers();
+      const res = yield urllib.request(host + '/upload.json', {
+        method: 'POST',
+        headers,
+        stream: form,
+      });
+
+      assert(res.status === 200);
+      const data = JSON.parse(res.data);
+      assert(data.filename === 'bar');
+    });
+
     it('should 400 upload with wrong content-type', function* () {
       const res = yield urllib.request(host + '/upload', {
         method: 'POST',

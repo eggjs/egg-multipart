@@ -20,7 +20,7 @@ module.exports = app => {
     checkExt = filename => options.whitelist.includes(path.extname(filename).toLowerCase());
   } else {
     const fileExtensions = (options.fileExtensions || []).map(extname => {
-      return extname.startsWith('.') ? extname : `.${extname}`;
+      return (extname.startsWith('.') || extname === '') ? extname : `.${extname}`;
     });
 
     // default extname whitelist
