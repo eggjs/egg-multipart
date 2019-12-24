@@ -78,7 +78,7 @@ Developer can custom additional file extensions:
 ```js
 // config/config.default.js
 exports.multipart = {
-  // will append to whilelist
+  // will append to whitelist
   fileExtensions: [
     '.foo',
     '.apk',
