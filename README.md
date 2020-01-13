@@ -230,7 +230,7 @@ module.exports = class extends Controller {
       } finally {
         // remove tmp files and don't block the request's response
         // cleanupRequestFiles won't throw error even remove file io error happen
-        ctx.cleanupRequestFiles();
+        ctx.cleanupRequestFiles([ file ]);
       }
       console.log(result);
     }
