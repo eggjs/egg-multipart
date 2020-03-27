@@ -106,7 +106,7 @@ declare module 'egg' {
       fields?: number;
       fileSize?: string|number;
       files?: number;
-      whitelist?: (() => string[])|string[];
+      whitelist?: ((filename: string) => boolean)|string[];
       fileExtensions?: string[];
       tmpdir?: string;
       cleanSchedule?: ScheduleOptions;
