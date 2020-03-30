@@ -1,4 +1,13 @@
 
+2.10.2 / 2020-03-30
+==================
+
+**fixes**
+  * [[`ce33219`](http://github.com/eggjs/egg-multipart/commit/ce33219f008e390a7321a8dfb52e887ca2d6aa71)] - fix: definition of config.whitelist (#43) (cjf <<cjfff1996@gmail.com>>)
+
+**others**
+  * [[`94c1135`](http://github.com/eggjs/egg-multipart/commit/94c1135f49dfbcea3a39d59b1b5e2b0a351d217a)] - docs: fix error handler example (#42) (zeroslope <<10218146+zeroslope@users.noreply.github.com>>)
+
 2.10.1 / 2019-12-16
 ==================
 
