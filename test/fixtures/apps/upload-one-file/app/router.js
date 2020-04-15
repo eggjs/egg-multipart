@@ -56,6 +56,11 @@ module.exports = app => {
     };
   });
 
+  app.post('/upload2', function* () {
+    yield this.getFileStream({ limits: { fileSize: '1kb' } });
+    this.body = this.request.body;
+  })
+
   app.post('/upload/async', 'async.async');
 
   app.post('/upload/allowEmpty', 'async.allowEmpty');

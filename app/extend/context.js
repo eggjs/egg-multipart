@@ -10,6 +10,7 @@ const fs = require('mz/fs');
 const mkdirp = require('mz-modules/mkdirp');
 const pump = require('mz-modules/pump');
 const rimraf = require('mz-modules/rimraf');
+const bytes = require('humanize-bytes');
 
 class EmptyStream extends Readable {
   _read() {
@@ -19,7 +20,7 @@ class EmptyStream extends Readable {
 
 const HAS_CONSUMED = Symbol('Context#multipartHasConsumed');
 
-async function limit(code, message) {
+function limit(code, message) {
   // throw 413 error
   const err = new Error(message);
   err.code = code;
@@ -92,11 +93,11 @@ module.exports = {
         const valueTruncated = part[3];
         if (valueTruncated) {
           await ctx.cleanupRequestFiles(requestFiles);
-          return await limit('Request_fieldSize_limit', 'Reach fieldSize limit');
+          limit('Request_fieldSize_limit', 'Reach fieldSize limit');
         }
         if (fieldnameTruncated) {
           await ctx.cleanupRequestFiles(requestFiles);
-          return await limit('Request_fieldNameSize_limit', 'Reach fieldNameSize limit');
+          limit('Request_fieldNameSize_limit', 'Reach fieldNameSize limit');
         }
 
         // arrays are busboy fields
@@ -142,7 +143,7 @@ module.exports = {
       // https://github.com/mscdex/busboy/blob/master/lib/types/multipart.js#L221
       if (part.truncated) {
         await ctx.cleanupRequestFiles(requestFiles);
-        return await limit('Request_fileSize_limit', 'Reach fileSize limit');
+        limit('Request_fileSize_limit', 'Reach fileSize limit');
       }
     } while (part != null);
 
@@ -174,7 +175,15 @@ module.exports = {
     if (options.defCharset) parseOptions.defCharset = options.defCharset;
     if (options.checkFile) parseOptions.checkFile = options.checkFile;
     // merge and create a new limits object
-    if (options.limits) parseOptions.limits = Object.assign({}, parseOptions.limits, options.limits);
+    if (options.limits) {
+      const limits = options.limits;
+      for (const key in limits) {
+        if (/^\w+Size$/.test(key)) {
+          limits[key] = bytes(limits[key]);
+        }
+      }
+      parseOptions.limits = Object.assign({}, parseOptions.limits, limits);
+    }
     return parse(this, parseOptions);
   },
 
@@ -216,6 +225,11 @@ module.exports = {
     if (!stream) {
       stream = new EmptyStream();
     }
+
+    if (stream.truncated) {
+      limit('Request_fileSize_limit', 'Request file too large, please check multipart config');
+    }
+
     stream.fields = parts.field;
     stream.once('limit', () => {
       const err = new Error('Request file too large, please check multipart config');
@@ -229,7 +243,7 @@ module.exports = {
       } else {
         this.coreLogger.error(err);
         // ignore next error event
-        stream.on('error', () => {});
+        stream.on('error', () => { });
       }
       // ignore all data
       stream.resume();
