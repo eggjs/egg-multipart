@@ -570,6 +570,25 @@ describe('test/multipart.test.js', () => {
       const data = result.data;
       assert(data.message.includes('Request file too large'));
     });
+
+    it('should file hit limits fileSize (byte)', function* () {
+      const form = formstream();
+      form.buffer('file', Buffer.alloc(1024 * 1024 * 100), 'foo.js');
+
+      const headers = form.headers();
+      const url = host + '/upload2';
+      const result = yield urllib.request(url, {
+        method: 'POST',
+        headers,
+        stream: form,
+        dataType: 'json',
+        agent,
+      });
+
+      assert(result.status === 413);
+      const data = result.data;
+      assert(data.message.includes('Request file too large'));
+    });
   });
 
   describe('upload over fileSize limit', () => {
