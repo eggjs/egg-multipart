@@ -1,4 +1,10 @@
 
+2.10.3 / 2020-05-06
+==================
+
+**fixes**
+  * [[`718df0e`](http://github.com/eggjs/egg-multipart/commit/718df0e85455746e6126c6de8180b427e798d217)] - fix: incorrect file size limit (#44) (hyj1991 <<yeekwanvong@gmail.com>>)
+
 2.10.2 / 2020-03-30
 ==================
 
