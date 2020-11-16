@@ -56,7 +56,7 @@
     }
   },
   "dependencies": {
-    "co-busboy": "^1.4.0",
+    "co-busboy": "^1.4.1",
     "egg-path-matching": "^1.0.1",
     "humanize-bytes": "^1.0.1",
     "moment": "^2.22.2",
