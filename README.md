@@ -147,6 +147,7 @@ config.multipart = {
     // run tmpdir clean job on every day 04:30 am
     // cron style see https://github.com/eggjs/egg-schedule#cron-style-scheduling
     cron: '0 30 4 * * *',
+    disable: false
   },
 };
 ```
