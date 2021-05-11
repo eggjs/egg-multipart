@@ -388,4 +388,38 @@ describe('test/file-mode.test.js', () => {
       app.expectLog('[egg-multipart:CleanTmpdir:success] tmpdir: "', 'coreLogger');
     });
   });
+
+  it('should keep last field', async () => {
+    mock(app.config.multipart, 'allowArrayFiled', false);
+    const form = formstream();
+    form.field('foo', 'fengmk2')
+      .field('foo', 'egg');
+    form.file('file2', __filename);
+
+    const headers = form.headers();
+    const res = await urllib.request(host + '/upload', {
+      method: 'POST',
+      headers,
+      stream: form,
+      dataType: 'json',
+    });
+    assert.deepStrictEqual(res.data.body, { foo: 'egg' });
+  });
+
+  it('should allow array field', async () => {
+    mock(app.config.multipart, 'allowArrayFiled', true);
+    const form = formstream();
+    form.field('foo', 'fengmk2')
+      .field('foo', 'egg');
+    form.file('file2', __filename);
+
+    const headers = form.headers();
+    const res = await urllib.request(host + '/upload', {
+      method: 'POST',
+      headers,
+      stream: form,
+      dataType: 'json',
+    });
+    assert.deepStrictEqual(res.data.body, { foo: [ 'fengmk2', 'egg' ] });
+  });
 });
