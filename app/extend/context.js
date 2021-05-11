@@ -69,7 +69,7 @@ module.exports = {
     if (options.defCharset) multipartOptions.defCharset = options.defCharset;
     if (options.limits) multipartOptions.limits = options.limits;
     if (options.checkFile) multipartOptions.checkFile = options.checkFile;
-    const allowArrayFiled = ctx.app.config.multipart.allowArrayFiled;
+    const allowArrayField = ctx.app.config.multipart.allowArrayField;
 
     let storedir;
 
@@ -103,7 +103,7 @@ module.exports = {
 
         // arrays are busboy fields
         const [ filedName, fieldValue ] = part;
-        if (allowArrayFiled && requestBody[filedName]) {
+        if (allowArrayField && requestBody[filedName]) {
           const fieldValues = requestBody[filedName] = Array.isArray(requestBody[filedName])
             ? requestBody[filedName]
             : [ requestBody[filedName] ];

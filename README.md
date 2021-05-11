@@ -151,13 +151,13 @@ config.multipart = {
 };
 ```
 
-Default will use the last field which has same name, if need the all fields value, please set `allowArrayFiled` in config.
+Default will use the last field which has same name, if need the all fields value, please set `allowArrayField` in config.
 
 ```js
 // config/config.default.js
 exports.multipart = {
   mode: 'file',
-  allowArrayFiled: true,
+  allowArrayField: true,
 };
 ```
 

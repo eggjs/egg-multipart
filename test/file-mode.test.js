@@ -390,7 +390,7 @@ describe('test/file-mode.test.js', () => {
   });
 
   it('should keep last field', async () => {
-    mock(app.config.multipart, 'allowArrayFiled', false);
+    mock(app.config.multipart, 'allowArrayField', false);
     const form = formstream();
     form.field('foo', 'fengmk2')
       .field('foo', 'egg');
@@ -407,7 +407,7 @@ describe('test/file-mode.test.js', () => {
   });
 
   it('should allow array field', async () => {
-    mock(app.config.multipart, 'allowArrayFiled', true);
+    mock(app.config.multipart, 'allowArrayField', true);
     const form = formstream();
     form.field('foo', 'fengmk2')
       .field('foo', 'egg');
