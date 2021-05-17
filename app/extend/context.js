@@ -114,15 +114,6 @@ module.exports = {
             requestBody[filedName].push(fieldValue);
           }
         }
-
-        if (allowArrayField && requestBody[filedName]) {
-          const fieldValues = requestBody[filedName] = Array.isArray(requestBody[filedName])
-            ? requestBody[filedName]
-            : [ requestBody[filedName] ];
-          fieldValues.push(fieldValue);
-        } else {
-          requestBody[filedName] = fieldValue;
-        }
         continue;
       }
 
