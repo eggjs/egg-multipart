@@ -103,6 +103,18 @@ module.exports = {
 
         // arrays are busboy fields
         const [ filedName, fieldValue ] = part;
+        if (!allowArrayField) {
+          requestBody[filedName] = fieldValue;
+        } else {
+          if (!requestBody[filedName]) {
+            requestBody[filedName] = fieldValue;
+          } else if (!Array.isArray(filedName)) {
+            requestBody[filedName] = [ requestBody[filedName], fieldValue ];
+          } else {
+            requestBody[filedName].push(fieldValue);
+          }
+        }
+
         if (allowArrayField && requestBody[filedName]) {
           const fieldValues = requestBody[filedName] = Array.isArray(requestBody[filedName])
             ? requestBody[filedName]
