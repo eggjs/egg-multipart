@@ -1,4 +1,10 @@
 
+2.11.0 / 2021-05-17
+==================
+
+**features**
+  * [[`a73c8e6`](http://github.com/eggjs/egg-multipart/commit/a73c8e66a03babac76e924cc23b14aa114e08ea2)] - feat: allow array fileds in file mode (#49) (killa <<killa123@126.com>>)
+
 2.10.3 / 2020-05-06
 ==================
 
