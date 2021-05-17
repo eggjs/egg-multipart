@@ -36,6 +36,7 @@ module.exports = appInfo => {
     files: 10,
     fileExtensions: [],
     whitelist: null,
+    allowArrayField: false,
     tmpdir: path.join(os.tmpdir(), 'egg-multipart-tmp', appInfo.name),
     cleanSchedule: {
       // run tmpdir clean job on every day 04:30 am

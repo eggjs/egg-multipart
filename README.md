@@ -151,6 +151,16 @@ config.multipart = {
 };
 ```
 
+Default will use the last field which has same name, if need the all fields value, please set `allowArrayField` in config.
+
+```js
+// config/config.default.js
+exports.multipart = {
+  mode: 'file',
+  allowArrayField: true,
+};
+```
+
 ### Upload One File
 
 ```html
