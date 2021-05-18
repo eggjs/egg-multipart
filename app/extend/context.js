@@ -108,7 +108,7 @@ module.exports = {
         } else {
           if (!requestBody[filedName]) {
             requestBody[filedName] = fieldValue;
-          } else if (!Array.isArray(filedName)) {
+          } else if (!Array.isArray(requestBody[filedName])) {
             requestBody[filedName] = [ requestBody[filedName], fieldValue ];
           } else {
             requestBody[filedName].push(fieldValue);

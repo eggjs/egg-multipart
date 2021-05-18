@@ -410,6 +410,7 @@ describe('test/file-mode.test.js', () => {
     mock(app.config.multipart, 'allowArrayField', true);
     const form = formstream();
     form.field('foo', 'fengmk2')
+      .field('foo', 'like')
       .field('foo', 'egg');
     form.file('file2', __filename);
 
@@ -420,6 +421,6 @@ describe('test/file-mode.test.js', () => {
       stream: form,
       dataType: 'json',
     });
-    assert.deepStrictEqual(res.data.body, { foo: [ 'fengmk2', 'egg' ] });
+    assert.deepStrictEqual(res.data.body, { foo: [ 'fengmk2', 'like', 'egg' ] });
   });
 });
