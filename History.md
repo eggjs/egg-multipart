@@ -1,4 +1,10 @@
 
+2.11.1 / 2021-05-18
+==================
+
+**fixes**
+  * [[`73ea7f2`](http://github.com/eggjs/egg-multipart/commit/73ea7f205408b99146fa784b851001314119413b)] - fix: fix array filed value (#50) (killa <<killa123@126.com>>)
+
 2.11.0 / 2021-05-17
 ==================
 
