@@ -50,7 +50,7 @@
     "command": {
       "azure-pipelines": "ci-windows"
     },
-    "version": "8, 10, 12",
+    "version": "8, 10, 12, 14, 16",
     "license": {
       "year": 2017
     }
