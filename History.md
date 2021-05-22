@@ -1,4 +1,10 @@
 
+2.12.0 / 2021-05-22
+==================
+
+**features**
+  * [[`ebd22fb`](http://github.com/eggjs/egg-multipart/commit/ebd22fb62e16f6bc6b785d28a5e19bb3e7915170)] - feat: deleting the temporary directory is optional (#48) (cd-xulei <<chengduxulei@foxmail.com>>)
+
 2.11.1 / 2021-05-18
 ==================
 
