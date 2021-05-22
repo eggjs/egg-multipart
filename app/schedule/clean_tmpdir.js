@@ -11,6 +11,7 @@ module.exports = app => {
       return {
         type: 'worker',
         cron: app.config.multipart.cleanSchedule.cron,
+        disable: app.config.multipart.cleanSchedule.disable,
         immediate: false,
       };
     }
