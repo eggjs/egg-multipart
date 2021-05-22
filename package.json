@@ -16,7 +16,6 @@
     "test-local": "egg-bin test",
     "cov": "egg-bin cov",
     "ci": "egg-bin pkgfiles && npm run lint && npm run cov",
-    "ci-windows": "egg-bin pkgfiles && npm run lint -- --fix && npm run cov",
     "pkgfiles": "egg-bin pkgfiles"
   },
   "repository": {
@@ -46,11 +45,11 @@
   ],
   "types": "index.d.ts",
   "ci": {
-    "type": "travis, azure-pipelines",
-    "command": {
-      "azure-pipelines": "ci-windows"
+    "type": "github",
+    "os": {
+      "github": "linux, macos"
     },
-    "version": "8, 10, 12",
+    "version": "8, 10, 12, 14, 16",
     "license": {
       "year": 2017
     }

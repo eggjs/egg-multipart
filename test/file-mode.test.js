@@ -371,7 +371,7 @@ describe('test/file-mode.test.js', () => {
 
       await Promise.all(oldDirs.map(dir => {
         // create files
-        return fs.writeFile(path.join(dir, Date.now() + ''), new Date());
+        return fs.writeFile(path.join(dir, Date.now() + ''), Date());
       }));
 
       app.mockLog();

@@ -5,3 +5,4 @@ coverage/
 test/fixtures/**/run
 .idea/
 .nyc_output/
+.DS_Store
