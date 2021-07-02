@@ -62,7 +62,7 @@
     "mz": "^2.7.0",
     "mz-modules": "^2.1.0",
     "stream-wormhole": "^1.1.0",
-    "uuid": "^3.3.2"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/node": "^11.11.3",
