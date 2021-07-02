@@ -1,3 +1,8 @@
+2.12.1 / 2021-07-02
+==================
+
+**fixes**
+  * [[`013ba19`](https://github.com/eggjs/egg-multipart/commit/013ba1939e5eeefa605e3b444d45d2513f90a875)] - deps: upgrade globby to the latest version for install warning (#52) (hubcarl <<hubcarl@126.com>>)
 
 2.12.0 / 2021-05-22
 ==================
