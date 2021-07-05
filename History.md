@@ -1,4 +1,12 @@
 
+2.13.0 / 2021-07-05
+==================
+
+**others**
+  * [[`013ba19`](http://github.com/eggjs/egg-multipart/commit/013ba1939e5eeefa605e3b444d45d2513f90a875)] - deps: upgrade globby to the latest version for install warning (sky <<hubcarl@126.com>>)
+  * [[`7e07b3b`](http://github.com/eggjs/egg-multipart/commit/7e07b3b7ec586b95f6ada9ac11ae5a778b2e73e3)] - chore: remove badges (fengmk2 <<fengmk2@gmail.com>>)
+  * [[`3fdc940`](http://github.com/eggjs/egg-multipart/commit/3fdc94025713f92e2be6d7e628b834d4bb8fbe5a)] - test: add limit fileSize per-request test cases (#51) (fengmk2 <<fengmk2@gmail.com>>)
+
 2.12.0 / 2021-05-22
 ==================
 
