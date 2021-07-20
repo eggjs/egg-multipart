@@ -9,6 +9,7 @@ interface EggFile {
 }
 
 interface MultipartOptions {
+  autoFields?: boolean;
   requireFile?: boolean; // required file submit, default is true
   defCharset?: string;
   limits?: {
