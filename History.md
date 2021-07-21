@@ -1,4 +1,10 @@
 
+2.13.1 / 2021-07-21
+==================
+
+**fixes**
+  * [[`20e765e`](http://github.com/eggjs/egg-multipart/commit/20e765ee2b121bbd1b3ba8853397990a67f7b76b)] - fix: add autoFields dts (#53) (恒遥 <<zhangyao318@gmail.com>>)
+
 2.13.0 / 2021-07-05
 ==================
 
