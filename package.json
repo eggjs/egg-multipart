@@ -35,7 +35,7 @@
   },
   "homepage": "https://github.com/eggjs/egg-multipart#readme",
   "engines": {
-    "node": ">= 8.0.0"
+    "node": ">= 14.0.0"
   },
   "files": [
     "app",
@@ -46,37 +46,34 @@
   "types": "index.d.ts",
   "ci": {
     "type": "github",
-    "os": {
-      "github": "linux, macos"
-    },
-    "version": "8, 10, 12, 14, 16",
+    "version": "14, 16, 18",
     "license": {
       "year": 2017
     }
   },
   "dependencies": {
-    "co-busboy": "^1.4.0",
+    "co-busboy": "^2.0.0",
     "egg-path-matching": "^1.0.1",
     "humanize-bytes": "^1.0.1",
-    "moment": "^2.22.2",
+    "moment": "^2.29.4",
     "mz": "^2.7.0",
     "mz-modules": "^2.1.0",
     "stream-wormhole": "^1.1.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@types/node": "^11.11.3",
-    "autod": "^3.0.1",
-    "coffee": "^5.2.1",
-    "egg": "^2.11.2",
-    "egg-bin": "^4.9.0",
-    "egg-ci": "^1.9.2",
-    "egg-mock": "^3.20.1",
-    "eslint": "^5.6.0",
-    "eslint-config-egg": "^7.1.0",
-    "formstream": "^1.1.0",
-    "is-type-of": "^1.0.0",
-    "urllib": "^2.30.0",
-    "typescript": "^3.2.2"
+    "@types/node": "^14.18.29",
+    "autod": "^3.1.2",
+    "coffee": "^5.4.0",
+    "egg": "^3.1.0",
+    "egg-bin": "^5.2.0",
+    "egg-ci": "^2.1.0",
+    "egg-mock": "^4.2.1",
+    "eslint": "^8.23.1",
+    "eslint-config-egg": "^12",
+    "formstream": "^1.1.1",
+    "is-type-of": "^1.2.1",
+    "typescript": "^4.8.3",
+    "urllib": "^2.38.1"
   }
 }
