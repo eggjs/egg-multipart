@@ -31,7 +31,7 @@ describe('test/file-mode-limit-filesize-per-request.test.js', () => {
 
   it('should 200 when file size just 1mb on /upload-limit-1mb', async () => {
     const form = formstream();
-    form.buffer('file', Buffer.alloc(0.5 * 1024 * 1024), '1mb.js', 'application/octet-stream');
+    form.buffer('file', Buffer.alloc(1 * 1024 * 1024 - 1), '1mb.js', 'application/octet-stream');
 
     const headers = form.headers();
     const res = await urllib.request(host + '/upload-limit-1mb', {
@@ -50,7 +50,7 @@ describe('test/file-mode-limit-filesize-per-request.test.js', () => {
     assert(data.files[0].mime === 'application/octet-stream');
     assert(data.files[0].filepath.startsWith(app.config.multipart.tmpdir));
     const stat = await fs.stat(data.files[0].filepath);
-    assert(stat.size === 0.5 * 1024 * 1024);
+    assert(stat.size === 1 * 1024 * 1024 - 1);
   });
 
   it('should 413 when file size > 1mb on /upload-limit-1mb', async () => {

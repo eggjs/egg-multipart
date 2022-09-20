@@ -94,7 +94,7 @@ describe('test/file-mode.test.js', () => {
 
   it('should 200 when file size just 10mb', async () => {
     const form = formstream();
-    form.buffer('file', Buffer.alloc(9 * 1024 * 1024), '10mb.js', 'application/octet-stream');
+    form.buffer('file', Buffer.alloc(10 * 1024 * 1024 - 1), '10mb.js', 'application/octet-stream');
     form.field('work', 'with Node.js');
     const headers = form.headers();
     const res = await urllib.request(host + '/upload', {
@@ -111,13 +111,13 @@ describe('test/file-mode.test.js', () => {
     assert(data.files[0].mime === 'application/octet-stream');
     assert(data.files[0].filepath.startsWith(app.config.multipart.tmpdir));
     const stat = await fs.stat(data.files[0].filepath);
-    assert(stat.size === 9 * 1024 * 1024);
+    assert(stat.size === 10 * 1024 * 1024 - 1);
     console.log('data.files[0].filepath', data.files[ 0 ].filepath)
   });
 
   it('should 200 when field size just 100kb', async () => {
     const form = formstream();
-    form.field('foo', 'a'.repeat(90 * 1024));
+    form.field('foo', 'a'.repeat(100 * 1024 - 1));
 
     const headers = form.headers();
     const res = await urllib.request(host + '/upload', {
@@ -128,7 +128,7 @@ describe('test/file-mode.test.js', () => {
 
     assert(res.status === 200);
     const data = JSON.parse(res.data);
-    assert(data.body.foo === 'a'.repeat(90 * 1024));
+    assert(data.body.foo === 'a'.repeat(100 * 1024 - 1));
   });
 
   it('should 200 when request fields equal 10', async () => {
@@ -242,8 +242,6 @@ describe('test/file-mode.test.js', () => {
     form.buffer('file3', Buffer.alloc(10 * 1024 * 1024 + 1), 'toobigfile.js', 'application/octet-stream');
     form.file('bigfile', path.join(__dirname, 'fixtures', 'bigfile.js'));
     // other form fields
-    form.field('work', 'with Node.js');
-
     const headers = form.headers();
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
