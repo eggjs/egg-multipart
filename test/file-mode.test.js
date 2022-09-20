@@ -95,7 +95,6 @@ describe('test/file-mode.test.js', () => {
   it('should 200 when file size just 10mb', async () => {
     const form = formstream();
     form.buffer('file', Buffer.alloc(10 * 1024 * 1024 - 1), '10mb.js', 'application/octet-stream');
-    form.field('work', 'with Node.js');
     const headers = form.headers();
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
@@ -112,7 +111,6 @@ describe('test/file-mode.test.js', () => {
     assert(data.files[0].filepath.startsWith(app.config.multipart.tmpdir));
     const stat = await fs.stat(data.files[0].filepath);
     assert(stat.size === 10 * 1024 * 1024 - 1);
-    console.log('data.files[0].filepath', data.files[ 0 ].filepath)
   });
 
   it('should 200 when field size just 100kb', async () => {
