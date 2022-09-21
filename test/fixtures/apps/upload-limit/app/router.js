@@ -2,6 +2,7 @@
 
 const path = require('path');
 const fs = require('fs').promises;
+const { createWriteStream } = require('fs');
 const os = require('os');
 
 module.exports = app => {
@@ -12,7 +13,7 @@ module.exports = app => {
       fs.mkdir(path.dirname(storefile), { recursive: true });
 
       return new Promise((resolve, reject) => {
-        const writeStream = fs.createWriteStream(storefile);
+        const writeStream = createWriteStream(storefile);
         stream.pipe(writeStream);
 
         if (!name.includes('not-handle-error-event')) {

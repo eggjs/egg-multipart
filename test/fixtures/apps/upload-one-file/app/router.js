@@ -3,6 +3,7 @@
 const path = require('path');
 const is = require('is-type-of');
 const fs = require('fs').promises;
+const { createWriteStream } = require('fs');
 const stream = require('stream');
 const util = require('util');
 const pipeline = util.promisify(stream.pipeline);
@@ -13,7 +14,7 @@ module.exports = app => {
     async put(name, stream) {
       const tmpfile = path.join(app.config.baseDir, 'run', Date.now() + name);
       await fs.mkdir(path.dirname(tmpfile), { recursive: true });
-      const writeStream = fs.createWriteStream(tmpfile);
+      const writeStream = createWriteStream(tmpfile);
       await pipeline(stream, writeStream);
       return {
         name,
@@ -25,31 +26,31 @@ module.exports = app => {
     },
   };
 
-  app.get('/', async () => {
-    this.body = {
-      app: is.object(this.app.oss),
-      ctx: is.object(this.oss),
-      putBucket: is.generatorFunction(this.oss.putBucket),
+  app.get('/', async ctx => {
+    ctx.body = {
+      app: is.object(ctx.app.oss),
+      ctx: is.object(ctx.oss),
+      putBucket: is.generatorFunction(ctx.oss.putBucket),
     };
   });
 
-  app.get('/uploadtest', async () => {
+  app.get('/uploadtest', async ctx => {
     const name = 'egg-oss-test-upload-' + process.version + '-' + Date.now();
-    this.body = await this.oss.put(name, fs.createReadStream(__filename));
+    ctx.body = await ctx.oss.put(name, fs.createReadStream(__filename));
   });
 
-  app.get('/upload', async () => {
-    this.set('x-csrf', this.csrf);
-    this.body = 'hi';
-    // await this.render('upload.html');
+  app.get('/upload', async ctx => {
+    ctx.set('x-csrf', ctx.csrf);
+    ctx.body = 'hi';
+    // await ctx.render('upload.html');
   });
 
-  app.post('/upload', async () => {
-    const stream = await this.getFileStream();
+  app.post('/upload', async ctx => {
+    const stream = await ctx.getFileStream();
     const name = 'egg-multipart-test/' + process.version + '-' + Date.now() + '-' + path.basename(stream.filename);
     // 文件处理，上传到云存储等等
-    const result = await this.oss.put(name, stream);
-    this.body = {
+    const result = await ctx.oss.put(name, stream);
+    ctx.body = {
       name: result.name,
       url: result.url,
       status: result.res.status,
@@ -57,9 +58,9 @@ module.exports = app => {
     };
   });
 
-  app.post('/upload2', async () => {
-    await this.getFileStream({ limits: { fileSize: '1kb' } });
-    this.body = this.request.body;
+  app.post('/upload2', async ctx => {
+    await ctx.getFileStream({ limits: { fileSize: '1kb' } });
+    ctx.body = ctx.request.body;
   })
 
   app.post('/upload/async', 'async.async');
