@@ -1,19 +1,19 @@
 'use strict';
 
 const path = require('path');
-const fs = require('fs');
-const is = require('is-type-of');
+const fs = require('fs').promises;
+const { createWriteStream } = require('fs');
 const os = require('os');
-const mkdirp = require('mz-modules/mkdirp');
 
 module.exports = app => {
   // mock oss
   app.context.oss = {
-    put(name, stream) {
+    async put(name, stream) {
+      const storefile = path.join(os.tmpdir(), name);
+      fs.mkdir(path.dirname(storefile), { recursive: true });
+
       return new Promise((resolve, reject) => {
-        const storefile = path.join(os.tmpdir(), name);
-        mkdirp.sync(path.dirname(storefile));
-        const writeStream = fs.createWriteStream(storefile);
+        const writeStream = createWriteStream(storefile);
         stream.pipe(writeStream);
 
         if (!name.includes('not-handle-error-event')) {

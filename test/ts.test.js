@@ -5,7 +5,7 @@ const formstream = require('formstream');
 const urllib = require('urllib');
 const path = require('path');
 const mock = require('egg-mock');
-const rimraf = require('mz-modules/rimraf');
+const fs = require('fs').promises;
 const coffee = require('coffee');
 
 describe('test/ts.test.js', () => {
@@ -35,7 +35,7 @@ describe('test/ts.test.js', () => {
     host = 'http://127.0.0.1:' + server.address().port;
   });
   after(() => {
-    return rimraf(app.config.multipart.tmpdir);
+    return fs.rm(app.config.multipart.tmpdir, { force: true, recursive: true });
   });
   after(() => app.close());
   after(() => server.close());

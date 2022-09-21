@@ -1,19 +1,21 @@
 'use strict';
 
 const path = require('path');
-const fs = require('fs');
 const is = require('is-type-of');
-const pump = require('mz-modules/pump');
-const mkdirp = require('mz-modules/mkdirp');
+const fs = require('fs').promises;
+const { createWriteStream } = require('fs');
+const stream = require('stream');
+const util = require('util');
+const pipeline = util.promisify(stream.pipeline);
 
 module.exports = app => {
   // mock oss
   app.context.oss = {
     async put(name, stream) {
       const tmpfile = path.join(app.config.baseDir, 'run', Date.now() + name);
-      await mkdirp(path.dirname(tmpfile));
-      const writeStream = fs.createWriteStream(tmpfile);
-      await pump(stream, writeStream);
+      await fs.mkdir(path.dirname(tmpfile), { recursive: true });
+      const writeStream = createWriteStream(tmpfile);
+      await pipeline(stream, writeStream);
       return {
         name,
         url: 'http://mockoss.com/' + name,
@@ -24,31 +26,31 @@ module.exports = app => {
     },
   };
 
-  app.get('/', function* () {
-    this.body = {
-      app: is.object(this.app.oss),
-      ctx: is.object(this.oss),
-      putBucket: is.generatorFunction(this.oss.putBucket),
+  app.get('/', async ctx => {
+    ctx.body = {
+      app: is.object(ctx.app.oss),
+      ctx: is.object(ctx.oss),
+      putBucket: is.generatorFunction(ctx.oss.putBucket),
     };
   });
 
-  app.get('/uploadtest', function* () {
+  app.get('/uploadtest', async ctx => {
     const name = 'egg-oss-test-upload-' + process.version + '-' + Date.now();
-    this.body = yield this.oss.put(name, fs.createReadStream(__filename));
+    ctx.body = await ctx.oss.put(name, fs.createReadStream(__filename));
   });
 
-  app.get('/upload', function* () {
-    this.set('x-csrf', this.csrf);
-    this.body = 'hi';
-    // yield this.render('upload.html');
+  app.get('/upload', async ctx => {
+    ctx.set('x-csrf', ctx.csrf);
+    ctx.body = 'hi';
+    // await ctx.render('upload.html');
   });
 
-  app.post('/upload', function* () {
-    const stream = yield this.getFileStream();
+  app.post('/upload', async ctx => {
+    const stream = await ctx.getFileStream();
     const name = 'egg-multipart-test/' + process.version + '-' + Date.now() + '-' + path.basename(stream.filename);
     // 文件处理，上传到云存储等等
-    const result = yield this.oss.put(name, stream);
-    this.body = {
+    const result = await ctx.oss.put(name, stream);
+    ctx.body = {
       name: result.name,
       url: result.url,
       status: result.res.status,
@@ -56,9 +58,9 @@ module.exports = app => {
     };
   });
 
-  app.post('/upload2', function* () {
-    yield this.getFileStream({ limits: { fileSize: '1kb' } });
-    this.body = this.request.body;
+  app.post('/upload2', async ctx => {
+    await ctx.getFileStream({ limits: { fileSize: '1kb' } });
+    ctx.body = ctx.request.body;
   })
 
   app.post('/upload/async', 'async.async');

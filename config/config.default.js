@@ -19,7 +19,7 @@ module.exports = appInfo => {
    * @property {Integer} fieldNameSize - Max field name size (in bytes), default is `100`
    * @property {String|Integer} fieldSize - Max field value size (in bytes), default is `100kb`
    * @property {Integer} fields - Max number of non-file fields, default is `10`
-   * @property {String|Integer} fileSize - Max file size (in bytes), default is `10mb`
+   * @property {String|Integer} fileSize - Max file size (in bytes), default is `10mb`, means should <10mb not <=10mb.
    * @property {Integer} files - Max number of file fields, default is `10`
    * @property {Array|Function} whitelist - The white ext file names, default is `null`
    * @property {Array} fileExtensions - Add more ext file names to the `whitelist`, default is `[]`

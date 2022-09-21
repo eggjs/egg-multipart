@@ -5,11 +5,16 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - main
+      - master
   pull_request:
-    branches: [ master ]
+    branches:
+      - main
+      - master
   schedule:
     - cron: '0 2 * * *'
+  workflow_dispatch: {}
 
 jobs:
   build:
@@ -18,8 +23,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [8, 10, 12, 14, 16]
-        os: [ubuntu-latest, macos-latest]
+        node-version: [14, 16, 18]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
     - name: Checkout Git Source
@@ -31,7 +36,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: Install Dependencies
-      run: npm i -g npminstall && npminstall
+      run: npm i
 
     - name: Continuous Integration
       run: npm run ci

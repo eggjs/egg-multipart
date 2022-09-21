@@ -5,9 +5,12 @@ const Agent = require('http').Agent;
 const formstream = require('formstream');
 const urllib = require('urllib');
 const path = require('path');
-const fs = require('mz/fs');
+const fs = require('fs').promises;
 const mock = require('egg-mock');
-const sleep = require('mz-modules/sleep');
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 const agent = new Agent({
   keepAlive: true,
@@ -18,13 +21,11 @@ describe('test/multipart.test.js', () => {
     let app;
     let server;
     let host;
-    before(() => {
+    before(async () => {
       app = mock.app({
         baseDir: 'apps/multipart',
       });
-      return app.ready();
-    });
-    before(function* () {
+      await app.ready();
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
     });
@@ -42,13 +43,13 @@ describe('test/multipart.test.js', () => {
       }
     });
 
-    it('should alway register clean_tmpdir schedule in stream mode', () => {
+    it('should alway register clean_tmpdir schedule in stream mode', async () => {
       const logger = app.loggers.scheduleLogger;
-      const content = fs.readFileSync(logger.options.file, 'utf8');
+      const content = await fs.readFile(logger.options.file, 'utf8');
       assert(/\[egg-schedule\]: register schedule .+clean_tmpdir\.js/.test(content));
     });
 
-    it('should upload with csrf', function* () {
+    it('should upload with csrf', async () => {
       const form = formstream();
       // form.file('file', filepath, filename);
       form.file('file', __filename);
@@ -56,7 +57,7 @@ describe('test/multipart.test.js', () => {
       form.field('foo', 'fengmk2').field('love', 'chair');
 
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload', {
+      const res = await urllib.request(host + '/upload', {
         method: 'POST',
         headers,
         stream: form,
@@ -67,7 +68,7 @@ describe('test/multipart.test.js', () => {
       assert(data.filename === 'multipart.test.js');
     });
 
-    it('should upload.json with ctoken', function* () {
+    it('should upload.json with ctoken', async () => {
       const form = formstream();
       // form.file('file', filepath, filename);
       form.file('file', __filename);
@@ -75,7 +76,7 @@ describe('test/multipart.test.js', () => {
       form.field('foo', 'fengmk2').field('love', 'chair');
 
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -86,7 +87,7 @@ describe('test/multipart.test.js', () => {
       assert(data.filename === 'multipart.test.js');
     });
 
-    it('should handle unread stream and return error response', function* () {
+    it('should handle unread stream and return error response', async () => {
       const form = formstream();
       // form.file('file', filepath, filename);
       form.file('file', __filename);
@@ -94,7 +95,7 @@ describe('test/multipart.test.js', () => {
       form.field('foo', 'fengmk2').field('love', 'chair');
 
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload?mock_stream_error=1', {
+      const res = await urllib.request(host + '/upload?mock_stream_error=1', {
         method: 'POST',
         headers,
         stream: form,
@@ -103,14 +104,14 @@ describe('test/multipart.test.js', () => {
       assert(res.data.toString().includes('ENOENT:'));
     });
 
-    it('should auto consumed file stream on error throw', function* () {
+    it('should auto consumed file stream on error throw', async () => {
       for (let i = 0; i < 10; i++) {
         const form = formstream();
         form.file('file', path.join(__dirname, 'fixtures/bigfile.js'));
 
         const headers = form.headers();
         const url = host + '/upload?mock_undefined_error=1';
-        const result = yield urllib.request(url, {
+        const result = await urllib.request(url, {
           method: 'POST',
           headers,
           stream: form,
@@ -121,15 +122,15 @@ describe('test/multipart.test.js', () => {
         assert(result.status === 500);
         const data = result.data;
         assert(data.message === 'part.foo is not a function');
-        yield sleep(100);
+        await sleep(100);
       }
     });
 
-    it('should throw 400 when extname wrong', function* () {
+    it('should throw 400 when extname wrong', async () => {
       const form = formstream();
       form.file('file', __filename, 'foo.rar');
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -140,12 +141,12 @@ describe('test/multipart.test.js', () => {
       assert(data.message === 'Invalid filename: foo.rar');
     });
 
-    it('should not throw 400 when file not speicified', function* () {
+    it('should not throw 400 when file not speicified', async () => {
       const form = formstream();
       // 模拟用户未选择文件点击了上传，这时 cotroller 是有 file stream 的，因为指定了 MIME application/octet-stream
       form.buffer('file', Buffer.from(''), '', 'application/octet-stream');
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -156,13 +157,13 @@ describe('test/multipart.test.js', () => {
       assert(data.message === 'no file');
     });
 
-    it('should not throw 400 when file stream empty', function* () {
+    it('should not throw 400 when file stream empty', async () => {
       const form = formstream();
       form.field('foo', 'bar');
       // 模拟用户未选择文件点击了上传，这时 cotroller 是有 file stream 的，因为指定了 MIME application/octet-stream
       // form.buffer('file', Buffer.from(''), '', 'application/octet-stream');
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -173,11 +174,11 @@ describe('test/multipart.test.js', () => {
       assert(data.message === 'no file');
     });
 
-    it('should upload when extname speicified in fileExtensions', function* () {
+    it('should upload when extname speicified in fileExtensions', async () => {
       const form = formstream();
       form.file('file', __filename, 'bar.foo');
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -188,11 +189,11 @@ describe('test/multipart.test.js', () => {
       assert(data.filename === 'bar.foo');
     });
 
-    it('should upload when extname speicified in fileExtensions and extname is in upper case', function* () {
+    it('should upload when extname speicified in fileExtensions and extname is in upper case', async () => {
       const form = formstream();
       form.file('file', __filename, 'bar.BAR');
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -203,11 +204,11 @@ describe('test/multipart.test.js', () => {
       assert(data.filename === 'bar.BAR');
     });
 
-    it('should upload when extname speicified in fileExtensions and extname is missing dot', function* () {
+    it('should upload when extname speicified in fileExtensions and extname is missing dot', async () => {
       const form = formstream();
       form.file('file', __filename, 'bar.abc');
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -218,11 +219,11 @@ describe('test/multipart.test.js', () => {
       assert(data.filename === 'bar.abc');
     });
 
-    it('should upload when extname is not speicified', function* () {
+    it('should upload when extname is not speicified', async () => {
       const form = formstream();
       form.file('file', __filename, 'bar');
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -233,8 +234,8 @@ describe('test/multipart.test.js', () => {
       assert(data.filename === 'bar');
     });
 
-    it('should 400 upload with wrong content-type', function* () {
-      const res = yield urllib.request(host + '/upload', {
+    it('should 400 upload with wrong content-type', async () => {
+      const res = await urllib.request(host + '/upload', {
         method: 'POST',
       });
 
@@ -242,8 +243,8 @@ describe('test/multipart.test.js', () => {
       assert(/Content-Type must be multipart/.test(res.data));
     });
 
-    it('should 400 upload.json with wrong content-type', function* () {
-      const res = yield urllib.request(host + '/upload.json', {
+    it('should 400 upload.json with wrong content-type', async () => {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         dataType: 'json',
       });
@@ -257,13 +258,11 @@ describe('test/multipart.test.js', () => {
     let app;
     let server;
     let host;
-    before(() => {
+    before(async () => {
       app = mock.app({
         baseDir: 'apps/multipart-with-whitelist',
       });
-      return app.ready();
-    });
-    before(function* () {
+      await app.ready();
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
     });
@@ -272,11 +271,11 @@ describe('test/multipart.test.js', () => {
     beforeEach(() => app.mockCsrf());
     afterEach(mock.restore);
 
-    it('should upload when extname speicified in whitelist', function* () {
+    it('should upload when extname speicified in whitelist', async () => {
       const form = formstream();
       form.file('file', __filename, 'bar.whitelist');
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -287,11 +286,11 @@ describe('test/multipart.test.js', () => {
       assert(data.filename === 'bar.whitelist');
     });
 
-    it('should upload when extname speicified in whitelist and extname is in upper case', function* () {
+    it('should upload when extname speicified in whitelist and extname is in upper case', async () => {
       const form = formstream();
       form.file('file', __filename, 'bar.WHITELIST');
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -303,11 +302,11 @@ describe('test/multipart.test.js', () => {
     });
 
 
-    it('should throw 400 when extname speicified in fileExtensions, but not in whitelist', function* () {
+    it('should throw 400 when extname speicified in fileExtensions, but not in whitelist', async () => {
       const form = formstream();
       form.file('file', __filename, 'foo.foo');
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -323,13 +322,11 @@ describe('test/multipart.test.js', () => {
     let app;
     let server;
     let host;
-    before(() => {
+    before(async () => {
       app = mock.app({
         baseDir: 'apps/whitelist-function',
       });
-      return app.ready();
-    });
-    before(function* () {
+      await app.ready();
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
     });
@@ -338,11 +335,11 @@ describe('test/multipart.test.js', () => {
     beforeEach(() => app.mockCsrf());
     afterEach(mock.restore);
 
-    it('should upload when extname pass whitelist function', function* () {
+    it('should upload when extname pass whitelist function', async () => {
       const form = formstream();
       form.file('file', __filename, 'bar');
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -353,11 +350,11 @@ describe('test/multipart.test.js', () => {
       assert(data.filename === 'bar');
     });
 
-    it('should throw 400 when extname not match whitelist function', function* () {
+    it('should throw 400 when extname not match whitelist function', async () => {
       const form = formstream();
       form.file('file', __filename, 'foo.png');
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -368,11 +365,11 @@ describe('test/multipart.test.js', () => {
       assert(data.message === 'Invalid filename: foo.png');
     });
 
-    it('should throw 400 when whitelist function throw error', function* () {
+    it('should throw 400 when whitelist function throw error', async () => {
       const form = formstream();
       form.file('file', __filename, 'error');
       const headers = form.headers();
-      const res = yield urllib.request(host + '/upload.json', {
+      const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
         stream: form,
@@ -388,16 +385,16 @@ describe('test/multipart.test.js', () => {
     let app;
     let server;
     let host;
-    before(() => {
+    before(async () => {
       app = mock.app({
         baseDir: 'apps/upload-one-file',
       });
-      return app.ready();
-    });
-    before(function* () {
+      await app.ready();
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
-      yield app.httpRequest()
+    });
+    before(async () => {
+      await app.httpRequest()
         .get('/upload')
         .expect(200);
     });
@@ -406,14 +403,14 @@ describe('test/multipart.test.js', () => {
     beforeEach(() => app.mockCsrf());
     afterEach(mock.restore);
 
-    it('should handle one upload file in simple way', function* () {
+    it('should handle one upload file in simple way', async () => {
       const form = formstream();
       form.field('foo', 'bar').field('[', 'toString').field(']', 'toString');
       form.file('file', __filename);
 
       const headers = form.headers();
       const url = host + '/upload';
-      const res = yield urllib.request(url, {
+      const res = await urllib.request(url, {
         method: 'POST',
         headers,
         stream: form,
@@ -431,13 +428,13 @@ describe('test/multipart.test.js', () => {
       assert(data.url.includes('http://mockoss.com/egg-multipart-test/'));
     });
 
-    it('should handle one upload file in simple way with async function controller', function* () {
+    it('should handle one upload file in simple way with async function controller', async () => {
       const form = formstream();
       form.file('file', __filename);
 
       const headers = form.headers();
       const url = host + '/upload/async';
-      const res = yield urllib.request(url, {
+      const res = await urllib.request(url, {
         method: 'POST',
         headers,
         stream: form,
@@ -451,7 +448,7 @@ describe('test/multipart.test.js', () => {
       assert(data.url.includes('http://mockoss.com/egg-multipart-test/'));
     });
 
-    it('should handle one upload file and all fields', function* () {
+    it('should handle one upload file and all fields', async () => {
       const form = formstream();
       form.field('f1', 'f1-value');
       form.field('f2', 'f2-value-中文');
@@ -459,7 +456,7 @@ describe('test/multipart.test.js', () => {
 
       const headers = form.headers();
       const url = host + '/upload';
-      const res = yield urllib.request(url, {
+      const res = await urllib.request(url, {
         method: 'POST',
         headers,
         stream: form,
@@ -477,13 +474,13 @@ describe('test/multipart.test.js', () => {
       });
     });
 
-    it('should 400 when no file upload', function* () {
+    it('should 400 when no file upload', async () => {
       const form = formstream();
       form.field('hi', 'ok');
 
       const headers = form.headers();
       const url = host + '/upload';
-      const res = yield urllib.request(url, {
+      const res = await urllib.request(url, {
         method: 'POST',
         headers,
         stream: form,
@@ -493,14 +490,14 @@ describe('test/multipart.test.js', () => {
       assert(res.data.toString().includes('Can\'t found upload file'));
     });
 
-    it('should no file upload and only fields', function* () {
+    it('should no file upload and only fields', async () => {
       const form = formstream();
       form.field('hi', 'ok');
       form.field('hi2', 'ok2');
 
       const headers = form.headers();
       const url = host + '/upload/allowEmpty';
-      const res = yield urllib.request(url, {
+      const res = await urllib.request(url, {
         method: 'POST',
         headers,
         stream: form,
@@ -516,12 +513,12 @@ describe('test/multipart.test.js', () => {
       });
     });
 
-    it('should 400 when no file speicified', function* () {
+    it('should 400 when no file speicified', async () => {
       const form = formstream();
       form.buffer('file', Buffer.from(''), '', 'application/octet-stream');
       const headers = form.headers();
       const url = host + '/upload';
-      const res = yield urllib.request(url, {
+      const res = await urllib.request(url, {
         method: 'POST',
         headers,
         stream: form,
@@ -530,14 +527,14 @@ describe('test/multipart.test.js', () => {
       assert(res.data.toString().includes('Can\'t found upload file'));
     });
 
-    it('should auto consumed file stream on error throw', function* () {
+    it('should auto consumed file stream on error throw', async () => {
       for (let i = 0; i < 10; i++) {
         const form = formstream();
         form.file('file', path.join(__dirname, 'fixtures/bigfile.js'));
 
         const headers = form.headers();
         const url = host + '/upload/async?foo=error';
-        const result = yield urllib.request(url, {
+        const result = await urllib.request(url, {
           method: 'POST',
           headers,
           stream: form,
@@ -548,17 +545,17 @@ describe('test/multipart.test.js', () => {
         assert(result.status === 500);
         const data = result.data;
         assert(data.message === 'stream.foo is not a function');
-        yield sleep(100);
+        await sleep(100);
       }
     });
 
-    it('should file hit limits fileSize', function* () {
+    it('should file hit limits fileSize', async () => {
       const form = formstream();
       form.buffer('file', Buffer.alloc(1024 * 1024 * 100), 'foo.js');
 
       const headers = form.headers();
       const url = host + '/upload/async?fileSize=100000';
-      const result = yield urllib.request(url, {
+      const result = await urllib.request(url, {
         method: 'POST',
         headers,
         stream: form,
@@ -571,13 +568,13 @@ describe('test/multipart.test.js', () => {
       assert(data.message.includes('Request file too large'));
     });
 
-    it('should file hit limits fileSize (byte)', function* () {
+    it('should file hit limits fileSize (byte)', async () => {
       const form = formstream();
       form.buffer('file', Buffer.alloc(1024 * 1024 * 100), 'foo.js');
 
       const headers = form.headers();
       const url = host + '/upload2';
-      const result = yield urllib.request(url, {
+      const result = await urllib.request(url, {
         method: 'POST',
         headers,
         stream: form,
@@ -596,36 +593,34 @@ describe('test/multipart.test.js', () => {
     let server;
     let host;
     const bigfile = path.join(__dirname, 'big.js');
-    before(() => {
+    before(async () => {
       app = mock.app({
         baseDir: 'apps/upload-limit',
       });
-      return app.ready();
-    });
-    before(function* () {
-      yield fs.writeFile(bigfile, Buffer.alloc(1024 * 1024 * 2));
+      await app.ready();
+      await fs.writeFile(bigfile, Buffer.alloc(1024 * 1024 * 2));
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
-      yield app.httpRequest()
+      await app.httpRequest()
         .get('/upload')
         .expect(200);
     });
-    after(function* () {
-      yield fs.unlink(bigfile);
+    after(async () => {
+      await fs.rm(bigfile, { force: true });
       server.close();
-      yield app.close();
+      await app.close();
     });
     beforeEach(() => app.mockCsrf());
     afterEach(mock.restore);
 
-    it('should show error', function* () {
+    it('should show error', async () => {
       const form = formstream();
       form.field('foo', 'bar').field('[', 'toString').field(']', 'toString');
       form.file('file', bigfile);
 
       const headers = form.headers();
       const url = host + '/upload';
-      const res = yield urllib.request(url, {
+      const res = await urllib.request(url, {
         method: 'POST',
         headers,
         stream: form,
@@ -639,14 +634,14 @@ describe('test/multipart.test.js', () => {
       app.expectLog('nodejs.MultipartFileTooLargeError: Request file too large', 'coreLogger');
     });
 
-    it('should ignore error when stream not handle error event', function* () {
+    it('should ignore error when stream not handle error event', async () => {
       const form = formstream();
       form.field('foo', 'bar').field('[', 'toString').field(']', 'toString');
       form.file('file', bigfile, 'not-handle-error-event.js');
 
       const headers = form.headers();
       const url = host + '/upload';
-      const res = yield urllib.request(url, {
+      const res = await urllib.request(url, {
         method: 'POST',
         headers,
         stream: form,
@@ -661,14 +656,14 @@ describe('test/multipart.test.js', () => {
       app.expectLog(/filename: ['"]not-handle-error-event.js['"]/, 'errorLogger');
     });
 
-    it('should ignore stream next errors after limit event fire', function* () {
+    it('should ignore stream next errors after limit event fire', async () => {
       const form = formstream();
       form.field('foo', 'bar').field('[', 'toString').field(']', 'toString');
       form.file('file', bigfile, 'not-handle-error-event-and-mock-stream-error.js');
 
       const headers = form.headers();
       const url = host + '/upload';
-      const res = yield urllib.request(url, {
+      const res = await urllib.request(url, {
         method: 'POST',
         headers,
         stream: form,
