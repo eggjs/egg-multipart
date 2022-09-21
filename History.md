@@ -1,4 +1,10 @@
 
+3.0.0 / 2022-09-21
+==================
+
+**others**
+  * [[`a488127`](http://github.com/eggjs/egg-multipart/commit/a488127dc399eda2542a39b268f04f78569a3be1)] - refactor: [BREAKING_CHANGE] update deps co-busbox && node>=14.x (#54) (TZ | 天猪 <<atian25@qq.com>>)
+
 2.13.1 / 2021-07-21
 ==================
 
