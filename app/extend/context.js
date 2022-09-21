@@ -6,10 +6,12 @@ const uuid = require('uuid');
 const parse = require('co-busboy');
 const sendToWormhole = require('stream-wormhole');
 const fs = require('fs').promises;
-const { pipeline } = require('stream').promises;
 const { createWriteStream } = require('fs');
 const bytes = require('humanize-bytes');
 const dayjs = require('dayjs');
+const stream = require('stream');
+const util = require('util');
+const pipeline = util.promisify(stream.pipeline);
 
 class EmptyStream extends Readable {
   _read() {
