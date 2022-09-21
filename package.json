@@ -78,5 +78,8 @@
     "is-type-of": "^1.0.0",
     "urllib": "^2.30.0",
     "typescript": "^3.2.2"
+  },
+  "publishConfig": {
+    "tag": "latest-2"
   }
 }
