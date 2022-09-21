@@ -4,9 +4,8 @@ const assert = require('assert');
 const formstream = require('formstream');
 const urllib = require('urllib');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs').promises;
 const mock = require('egg-mock');
-const rimraf = require('mz-modules/rimraf');
 
 describe('test/stream-mode-with-filematch.test.js', () => {
   let app;
@@ -23,7 +22,7 @@ describe('test/stream-mode-with-filematch.test.js', () => {
     host = 'http://127.0.0.1:' + server.address().port;
   });
   after(() => {
-    return rimraf(app.config.multipart.tmpdir);
+    return fs.rm(app.config.multipart.tmpdir, { force: true, recursive: true });
   });
   after(() => app.close());
   after(() => server.close());
@@ -147,10 +146,10 @@ describe('test/stream-mode-with-filematch.test.js', () => {
     });
   });
 
-  it('should register clean_tmpdir schedule', () => {
+  it('should register clean_tmpdir schedule', async () => {
     // [egg-schedule]: register schedule /hello/egg-multipart/app/schedule/clean_tmpdir.js
     const logger = app.loggers.scheduleLogger;
-    const content = fs.readFileSync(logger.options.file, 'utf8');
+    const content = await fs.readFile(logger.options.file, 'utf8');
     assert(/\[egg-schedule\]: register schedule .+clean_tmpdir\.js/.test(content));
   });
 });

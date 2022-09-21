@@ -5,12 +5,11 @@ const path = require('path');
 const uuid = require('uuid');
 const parse = require('co-busboy');
 const sendToWormhole = require('stream-wormhole');
-const moment = require('moment');
-const fs = require('mz/fs');
-const mkdirp = require('mz-modules/mkdirp');
-const pump = require('mz-modules/pump');
-const rimraf = require('mz-modules/rimraf');
+const fs = require('fs').promises;
+const { pipeline } = require('stream').promises;
+const { createWriteStream } = require('fs');
 const bytes = require('humanize-bytes');
+const dayjs = require('dayjs');
 
 class EmptyStream extends Readable {
   _read() {
@@ -41,7 +40,7 @@ module.exports = {
     if (Array.isArray(files)) {
       for (const file of files) {
         try {
-          await rimraf(file.filepath);
+          await fs.rm(file.filepath, { force: true, recursive: true });
         } catch (err) {
           // warning log
           this.coreLogger.warn('[egg-multipart-cleanupRequestFiles-error] file: %j, error: %s',
@@ -139,15 +138,12 @@ module.exports = {
 
       if (!storedir) {
         // ${tmpdir}/YYYY/MM/DD/HH
-        storedir = path.join(ctx.app.config.multipart.tmpdir, moment().format('YYYY/MM/DD/HH'));
-        const exists = await fs.exists(storedir);
-        if (!exists) {
-          await mkdirp(storedir);
-        }
+        storedir = path.join(ctx.app.config.multipart.tmpdir, dayjs().format('YYYY/MM/DD/HH'));
+        await fs.mkdir(storedir, { recursive: true });
       }
       const filepath = path.join(storedir, uuid.v4() + path.extname(meta.filename));
-      const target = fs.createWriteStream(filepath);
-      await pump(part, target);
+      const target = createWriteStream(filepath);
+      await pipeline(part, target);
       // https://github.com/mscdex/busboy/blob/master/lib/types/multipart.js#L221
       meta.filepath = filepath;
       requestFiles.push(meta);

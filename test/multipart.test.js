@@ -5,9 +5,12 @@ const Agent = require('http').Agent;
 const formstream = require('formstream');
 const urllib = require('urllib');
 const path = require('path');
-const fs = require('mz/fs');
+const fs = require('fs').promises;
 const mock = require('egg-mock');
-const sleep = require('mz-modules/sleep');
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 const agent = new Agent({
   keepAlive: true,
@@ -18,13 +21,11 @@ describe('test/multipart.test.js', () => {
     let app;
     let server;
     let host;
-    before(() => {
+    before(async () => {
       app = mock.app({
         baseDir: 'apps/multipart',
       });
-      return app.ready();
-    });
-    before(function* () {
+      await app.ready();
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
     });
@@ -42,9 +43,9 @@ describe('test/multipart.test.js', () => {
       }
     });
 
-    it('should alway register clean_tmpdir schedule in stream mode', () => {
+    it('should alway register clean_tmpdir schedule in stream mode', async () => {
       const logger = app.loggers.scheduleLogger;
-      const content = fs.readFileSync(logger.options.file, 'utf8');
+      const content = await fs.readFile(logger.options.file, 'utf8');
       assert(/\[egg-schedule\]: register schedule .+clean_tmpdir\.js/.test(content));
     });
 
@@ -257,13 +258,11 @@ describe('test/multipart.test.js', () => {
     let app;
     let server;
     let host;
-    before(() => {
+    before(async () => {
       app = mock.app({
         baseDir: 'apps/multipart-with-whitelist',
       });
-      return app.ready();
-    });
-    before(function* () {
+      await app.ready();
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
     });
@@ -323,13 +322,11 @@ describe('test/multipart.test.js', () => {
     let app;
     let server;
     let host;
-    before(() => {
+    before(async () => {
       app = mock.app({
         baseDir: 'apps/whitelist-function',
       });
-      return app.ready();
-    });
-    before(function* () {
+      await app.ready();
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
     });
@@ -388,15 +385,15 @@ describe('test/multipart.test.js', () => {
     let app;
     let server;
     let host;
-    before(() => {
+    before(async () => {
       app = mock.app({
         baseDir: 'apps/upload-one-file',
       });
-      return app.ready();
-    });
-    before(function* () {
+      await app.ready();
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
+    });
+    before(function* () {
       yield app.httpRequest()
         .get('/upload')
         .expect(200);
@@ -602,18 +599,18 @@ describe('test/multipart.test.js', () => {
       });
       return app.ready();
     });
-    before(function* () {
-      yield fs.writeFile(bigfile, Buffer.alloc(1024 * 1024 * 2));
+    before(async () => {
+      await fs.writeFile(bigfile, Buffer.alloc(1024 * 1024 * 2));
       server = app.listen();
       host = 'http://127.0.0.1:' + server.address().port;
-      yield app.httpRequest()
+      await app.httpRequest()
         .get('/upload')
         .expect(200);
     });
-    after(function* () {
-      yield fs.unlink(bigfile);
+    after(async () => {
+      await fs.rm(bigfile, { force: true });
       server.close();
-      yield app.close();
+      await app.close();
     });
     beforeEach(() => app.mockCsrf());
     afterEach(mock.restore);

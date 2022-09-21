@@ -1,19 +1,18 @@
 'use strict';
 
 const path = require('path');
-const fs = require('fs');
 const is = require('is-type-of');
-const pump = require('mz-modules/pump');
-const mkdirp = require('mz-modules/mkdirp');
+const fs = require('fs').promises;
+const { pipeline } = require('stream').promises;
 
 module.exports = app => {
   // mock oss
   app.context.oss = {
     async put(name, stream) {
       const tmpfile = path.join(app.config.baseDir, 'run', Date.now() + name);
-      await mkdirp(path.dirname(tmpfile));
+      await fs.mkdir(path.dirname(tmpfile), { recursive: true });
       const writeStream = fs.createWriteStream(tmpfile);
-      await pump(stream, writeStream);
+      await pipeline(stream, writeStream);
       return {
         name,
         url: 'http://mockoss.com/' + name,

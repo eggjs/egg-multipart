@@ -5,10 +5,8 @@ const formstream = require('formstream');
 const urllib = require('urllib');
 const path = require('path');
 const mock = require('egg-mock');
-const rimraf = require('mz-modules/rimraf');
-const mkdirp = require('mz-modules/mkdirp');
-const fs = require('mz/fs');
-const moment = require('moment');
+const fs = require('fs').promises;
+const dayjs = require('dayjs');
 
 describe('test/file-mode.test.js', () => {
   let app;
@@ -25,7 +23,7 @@ describe('test/file-mode.test.js', () => {
     host = 'http://127.0.0.1:' + server.address().port;
   });
   after(() => {
-    return rimraf(app.config.multipart.tmpdir);
+    return fs.rm(app.config.multipart.tmpdir, { force: true, recursive: true });
   });
   after(() => app.close());
   after(() => server.close());
@@ -327,10 +325,10 @@ describe('test/file-mode.test.js', () => {
   });
 
   describe('schedule/clean_tmpdir', () => {
-    it('should register clean_tmpdir schedule', () => {
+    it('should register clean_tmpdir schedule', async () => {
       // [egg-schedule]: register schedule /hello/egg-multipart/app/schedule/clean_tmpdir.js
       const logger = app.loggers.scheduleLogger;
-      const content = fs.readFileSync(logger.options.file, 'utf8');
+      const content = await fs.readFile(logger.options.file, 'utf8');
       assert(/\[egg-schedule\]: register schedule .+clean_tmpdir\.js/.test(content));
     });
 
@@ -343,27 +341,27 @@ describe('test/file-mode.test.js', () => {
 
     it('should remove old dirs', async () => {
       const oldDirs = [
-        path.join(app.config.multipart.tmpdir, moment().subtract(1, 'years').format('YYYY/MM/DD/HH')),
-        path.join(app.config.multipart.tmpdir, moment().subtract(1, 'months').format('YYYY/MM/DD/HH')),
-        path.join(app.config.multipart.tmpdir, moment().subtract(2, 'months').format('YYYY/MM/DD/HH')),
-        path.join(app.config.multipart.tmpdir, moment().subtract(3, 'months').format('YYYY/MM/DD/HH')),
-        path.join(app.config.multipart.tmpdir, moment().subtract(1, 'days').format('YYYY/MM/DD/HH')),
-        path.join(app.config.multipart.tmpdir, moment().subtract(7, 'days').format('YYYY/MM/DD/HH')),
+        path.join(app.config.multipart.tmpdir, dayjs().subtract(1, 'years').format('YYYY/MM/DD/HH')),
+        path.join(app.config.multipart.tmpdir, dayjs().subtract(1, 'months').format('YYYY/MM/DD/HH')),
+        path.join(app.config.multipart.tmpdir, dayjs().subtract(2, 'months').format('YYYY/MM/DD/HH')),
+        path.join(app.config.multipart.tmpdir, dayjs().subtract(3, 'months').format('YYYY/MM/DD/HH')),
+        path.join(app.config.multipart.tmpdir, dayjs().subtract(1, 'days').format('YYYY/MM/DD/HH')),
+        path.join(app.config.multipart.tmpdir, dayjs().subtract(7, 'days').format('YYYY/MM/DD/HH')),
       ];
       const shouldKeepDirs = [
-        path.join(app.config.multipart.tmpdir, moment().subtract(2, 'years').format('YYYY/MM/DD/HH')),
-        path.join(app.config.multipart.tmpdir, moment().format('YYYY/MM/DD/HH')),
+        path.join(app.config.multipart.tmpdir, dayjs().subtract(2, 'years').format('YYYY/MM/DD/HH')),
+        path.join(app.config.multipart.tmpdir, dayjs().format('YYYY/MM/DD/HH')),
       ];
       const currentMonth = new Date().getMonth();
-      const fourMonthBefore = path.join(app.config.multipart.tmpdir, moment().subtract(4, 'months').format('YYYY/MM/DD/HH'));
+      const fourMonthBefore = path.join(app.config.multipart.tmpdir, dayjs().subtract(4, 'months').format('YYYY/MM/DD/HH'));
       if (currentMonth < 4) {
         // if current month is less than April, four months before shoule be last year.
         oldDirs.push(fourMonthBefore);
       } else {
         shouldKeepDirs.push(fourMonthBefore);
       }
-      await Promise.all(oldDirs.map(dir => mkdirp(dir)));
-      await Promise.all(shouldKeepDirs.map(dir => mkdirp(dir)));
+      await Promise.all(oldDirs.map(dir => fs.mkdir(dir, { recursive: true })));
+      await Promise.all(shouldKeepDirs.map(dir => fs.mkdir(dir, { recursive: true })));
 
       await Promise.all(oldDirs.map(dir => {
         // create files
@@ -373,11 +371,11 @@ describe('test/file-mode.test.js', () => {
       app.mockLog();
       await app.runSchedule(path.join(__dirname, '../app/schedule/clean_tmpdir'));
       for (const dir of oldDirs) {
-        const exists = await fs.exists(dir);
+        const exists = await fs.access(dir).then(() => true).catch(() => false);
         assert(!exists, dir);
       }
       for (const dir of shouldKeepDirs) {
-        const exists = await fs.exists(dir);
+        const exists = await fs.access(dir).then(() => true).catch(() => false);
         assert(exists, dir);
       }
       app.expectLog('[egg-multipart:CleanTmpdir] removing tmpdir: "', 'coreLogger');
