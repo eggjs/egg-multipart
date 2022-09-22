@@ -631,8 +631,8 @@ describe('test/multipart.test.js', () => {
       assert(res.status === 413);
       assert(data.message.includes('Request file too large'));
       console.log('@@@', app.logger.options.file);
-      const content = await fs.readFile(app.logger.options.file, 'utf-8');
-      console.log('@@@', content, '@@@');
+      // const content = await fs.readFile(app.logger.options.file, 'utf-8');
+      // console.log('@@@', content, '@@@');
       app.expectLog('nodejs.MultipartFileTooLargeError: Request file too large', 'coreLogger');
     });
 
