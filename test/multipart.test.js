@@ -613,7 +613,7 @@ describe('test/multipart.test.js', () => {
     beforeEach(() => app.mockCsrf());
     afterEach(mock.restore);
 
-    it.only('should show error', async () => {
+    it('should show error', async () => {
       const form = formstream();
       form.field('foo', 'bar').field('[', 'toString').field(']', 'toString');
       form.file('file', bigfile);
@@ -630,10 +630,9 @@ describe('test/multipart.test.js', () => {
       const data = res.data;
       assert(res.status === 413);
       assert(data.message.includes('Request file too large'));
-      console.log('@@@', app.logger.options.file);
-      // const content = await fs.readFile(app.logger.options.file, 'utf-8');
-      // console.log('@@@', content, '@@@');
-      app.expectLog('nodejs.MultipartFileTooLargeError: Request file too large', 'coreLogger');
+      const content = await fs.readFile(app.coreLogger.options.file, 'utf-8');
+      assert(content.includes('nodejs.MultipartFileTooLargeError: Request file too large'));
+      // app.expectLog('nodejs.MultipartFileTooLargeError: Request file too large', 'coreLogger');
     });
 
     it('should ignore error when stream not handle error event', async () => {
