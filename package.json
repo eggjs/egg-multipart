@@ -45,8 +45,8 @@
   ],
   "types": "index.d.ts",
   "ci": {
-    "type": "github",
     "version": "14, 16, 18",
+    "os": "linux",
     "license": {
       "year": 2017
     }

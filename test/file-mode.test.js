@@ -163,6 +163,15 @@ describe('test/file-mode.test.js', () => {
     assert(data.files.length === 10);
   });
 
+  it('should handle non-ascii filename', async () => {
+    const file = path.join(__dirname, 'fixtures', '中文名.js');
+    const res = await app.httpRequest()
+      .post('/upload')
+      .attach('file', file);
+    assert(res.status === 200);
+    assert(res.body.files[0].filename === '中文名.js');
+  });
+
   it('should throw error when request fields limit', async () => {
     const form = formstream();
     for (let i = 0; i < 11; i++) {
