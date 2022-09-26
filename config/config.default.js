@@ -16,7 +16,7 @@ module.exports = appInfo => {
    * @property {Boolean} autoFields - Auto set fields to parts, default is `false`. Only work on `stream` mode.
    *   If set true，all fields will be auto handle and can acces by `parts.fields`
    * @property {String} defaultCharset - Default charset encoding, don't change it before you real know about it
-   * @property {String} defParamCharset - For multipart forms, the default character set to use for values of part header parameters (e.g. filename) that are not extended parameters (that contain an explicit charset), don't change it before you real know about it
+   * @property {String} defaultParamCharset - For multipart forms, the default character set to use for values of part header parameters (e.g. filename) that are not extended parameters (that contain an explicit charset), don't change it before you real know about it
    * @property {Integer} fieldNameSize - Max field name size (in bytes), default is `100`
    * @property {String|Integer} fieldSize - Max field value size (in bytes), default is `100kb`
    * @property {Integer} fields - Max number of non-file fields, default is `10`
@@ -30,7 +30,7 @@ module.exports = appInfo => {
     mode: 'stream',
     autoFields: false,
     defaultCharset: 'utf8',
-    defParamCharset: 'utf8',
+    defaultParamCharset: 'utf8',
     fieldNameSize: 100,
     fieldSize: '100kb',
     fields: 10,

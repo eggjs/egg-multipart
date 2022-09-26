@@ -59,7 +59,7 @@ module.exports = app => {
   app.config.multipartParseOptions = {
     autoFields: options.autoFields,
     defCharset: options.defaultCharset,
-    defParamCharset: options.defParamCharset,
+    defParamCharset: options.defaultParamCharset,
     limits: {
       fieldNameSize: options.fieldNameSize,
       fieldSize: options.fieldSize,
