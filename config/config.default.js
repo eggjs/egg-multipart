@@ -23,7 +23,7 @@ module.exports = appInfo => {
    * @property {String|Integer} fileSize - Max file size (in bytes), default is `10mb`, means should <10mb not <=10mb.
    * @property {Integer} files - Max number of file fields, default is `10`
    * @property {Array|Function} whitelist - The white ext file names, default is `null`
-   * @property {Array} fileExtensions - Add more ext file names to the `whitelist`, default is `[]`
+   * @property {Array} fileExtensions - Add more ext file names to the `whitelist`, default is `[]`, only valid when `whitelist` is `null`
    * @property {String} tmpdir - The directory for temporary files. Only work on `file` mode.
    */
   config.multipart = {

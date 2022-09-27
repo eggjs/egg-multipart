@@ -8,7 +8,7 @@ module.exports = class AppBootHook {
   }
 
   configWillLoad() {
-    const options = normalizeOptions(this.app.config.multipart);
+    const options = this.app.config.multipart = normalizeOptions(this.app.config.multipart);
 
     this.app.coreLogger.info('[egg-multipart] %s mode enable', options.mode);
     if (options.mode === 'file' || options.fileModeMatch) {
