@@ -7,6 +7,7 @@ const path = require('path');
 const mock = require('egg-mock');
 const fs = require('fs').promises;
 const dayjs = require('dayjs');
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('test/file-mode.test.js', () => {
   let app;
@@ -344,6 +345,7 @@ describe('test/file-mode.test.js', () => {
     it('should remove nothing', async () => {
       app.mockLog();
       await app.runSchedule(path.join(__dirname, '../app/schedule/clean_tmpdir'));
+      await sleep(1000);
       app.expectLog('[egg-multipart:CleanTmpdir] start clean tmpdir: "', 'coreLogger');
       app.expectLog('[egg-multipart:CleanTmpdir] end', 'coreLogger');
     });

@@ -45,8 +45,7 @@ module.exports = {
           await fs.rm(file.filepath, { force: true, recursive: true });
         } catch (err) {
           // warning log
-          this.coreLogger.warn('[egg-multipart-cleanupRequestFiles-error] file: %j, error: %s',
-            file, err);
+          this.coreLogger.warn('[egg-multipart-cleanupRequestFiles-error] file: %j, error: %s', file, err);
         }
       }
     }
