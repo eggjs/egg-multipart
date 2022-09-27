@@ -12,7 +12,6 @@ describe('test/wrong-mode.test.js', () => {
       .then(() => {
         throw new Error('should not run this');
       }, err => {
-        assert(err.name === 'TypeError');
         assert(err.message === 'Expect mode to be \'stream\' or \'file\', but got \'foo\'');
       });
   });
@@ -25,7 +24,6 @@ describe('test/wrong-mode.test.js', () => {
       .then(() => {
         throw new Error('should not run this');
       }, err => {
-        assert(err.name === 'TypeError');
         assert(err.message === '`fileModeMatch` options only work on stream mode, please remove it');
       });
   });

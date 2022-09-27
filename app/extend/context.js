@@ -68,6 +68,7 @@ module.exports = {
       autoFields: false,
     };
     if (options.defCharset) multipartOptions.defCharset = options.defCharset;
+    if (options.defParamCharset) multipartOptions.defParamCharset = options.defParamCharset;
     if (options.limits) multipartOptions.limits = options.limits;
     if (options.checkFile) multipartOptions.checkFile = options.checkFile;
     const allowArrayField = ctx.app.config.multipart.allowArrayField;
