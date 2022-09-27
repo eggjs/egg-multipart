@@ -176,10 +176,25 @@ module.exports = {
 
     this[HAS_CONSUMED] = true;
 
+    const multipartConfig = this.app.config.multipart;
     options = extractOptions(options);
-    // merge and create a new limits object
-    const limits = Object.assign({}, this.app.config.multipartParseOptions.limits, options.limits);
-    const parseOptions = Object.assign({}, this.app.config.multipartParseOptions, options, { limits });
+
+    const parseOptions = Object.assign({
+      autoFields: multipartConfig.autoFields,
+      defCharset: multipartConfig.defaultCharset,
+      defParamCharset: multipartConfig.defaultParamCharset,
+      checkFile: multipartConfig.checkFile,
+    }, options);
+
+    // https://github.com/mscdex/busboy#busboy-methods
+    // merge limits
+    parseOptions.limits = Object.assign({
+      fieldNameSize: multipartConfig.fieldNameSize,
+      fieldSize: multipartConfig.fieldSize,
+      fields: multipartConfig.fields,
+      fileSize: multipartConfig.fileSize,
+      files: multipartConfig.files,
+    }, options.limits);
 
     return parse(this, parseOptions);
   },
@@ -258,11 +273,12 @@ function extractOptions(options = {}) {
 
   // limits
   if (options.limits) {
-    opts.limits = {};
-    const limits = options.limits || {};
-    if (limits.fileSize) opts.limits.fileSize = bytes(limits.fileSize);
-    if (limits.fieldSize) opts.limits.fieldSize = bytes(limits.fieldSize);
-    if (limits.fieldNameSize) opts.limits.fieldNameSize = bytes(limits.fieldNameSize);
+    opts.limits = Object.assign({}, options.limits);
+    for (const key in opts.limits) {
+      if (key.endsWith('Size')) {
+        opts.limits[key] = bytes(opts.limits[key]);
+      }
+    }
   }
 
   return opts;

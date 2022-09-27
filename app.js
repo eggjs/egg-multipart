@@ -8,7 +8,8 @@ module.exports = class AppBootHook {
   }
 
   configWillLoad() {
-    const options = this.app.config.multipart = normalizeOptions(this.app.config.multipart);
+    this.app.config.multipart = normalizeOptions(this.app.config.multipart);
+    const options = this.app.config.multipart;
 
     this.app.coreLogger.info('[egg-multipart] %s mode enable', options.mode);
     if (options.mode === 'file' || options.fileModeMatch) {
@@ -16,22 +17,6 @@ module.exports = class AppBootHook {
       // enable multipart middleware
       this.app.config.coreMiddleware.push('multipart');
     }
-
-    // https://github.com/mscdex/busboy#busboy-methods
-    this.app.config.multipartParseOptions = {
-      autoFields: options.autoFields,
-      defCharset: options.defaultCharset,
-      defParamCharset: options.defaultParamCharset,
-      limits: {
-        fieldNameSize: options.fieldNameSize,
-        fieldSize: options.fieldSize,
-        fields: options.fields,
-        fileSize: options.fileSize,
-        files: options.files,
-      },
-      // check if extname in the whitelist
-      checkFile: options.checkFile,
-    };
   }
 };
 
