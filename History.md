@@ -1,4 +1,12 @@
 
+3.1.0 / 2022-09-27
+==================
+
+**others**
+  * [[`399c6cb`](http://github.com/eggjs/egg-multipart/commit/399c6cb8c685337c3a9bcab00191e8e4a018f25f)] - 🐛 feat: refactor multipart options normalize && fix defParamCharset default to utf8 (#56) (fengmk2 <<fengmk2@gmail.com>>)
+  * [[`69ba7c0`](http://github.com/eggjs/egg-multipart/commit/69ba7c0c91321866f4f3cdab06d66081cae3796a)] - Create codeql-analysis.yml (fengmk2 <<fengmk2@gmail.com>>)
+  * [[`cc93417`](http://github.com/eggjs/egg-multipart/commit/cc93417af059788ff54d6af56816991e1e0d8b6a)] - test: fix ci (#55) (TZ | 天猪 <<atian25@qq.com>>)
+
 3.0.0 / 2022-09-21
 ==================
 
