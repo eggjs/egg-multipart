@@ -11,7 +11,9 @@ interface EggFile {
 interface MultipartOptions {
   autoFields?: boolean;
   requireFile?: boolean; // required file submit, default is true
-  defCharset?: string;
+  defaultCharset?: string;
+  defaultParamCharset?: string;
+  defCharset?: string; // compatible with defaultCharset, use `defaultCharset` instead
   limits?: {
     fieldNameSize?: number;
     fieldSize?: number;
@@ -102,6 +104,7 @@ declare module 'egg' {
       fileModeMatch?: MatchItem | MatchItem[];
       autoFields?: boolean;
       defaultCharset?: string;
+      defaultParamCharset?: string;
       fieldNameSize?: number;
       fieldSize?: string|number;
       fields?: number;

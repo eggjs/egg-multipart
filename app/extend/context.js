@@ -45,8 +45,7 @@ module.exports = {
           await fs.rm(file.filepath, { force: true, recursive: true });
         } catch (err) {
           // warning log
-          this.coreLogger.warn('[egg-multipart-cleanupRequestFiles-error] file: %j, error: %s',
-            file, err);
+          this.coreLogger.warn('[egg-multipart-cleanupRequestFiles-error] file: %j, error: %s', file, err);
         }
       }
     }
@@ -56,20 +55,14 @@ module.exports = {
    * save request multipart data and files to `ctx.request`
    * @function Context#saveRequestFiles
    * @param {Object} options
-   *  - {String} options.defCharset
+   *  - {String} options.defaultCharset
+   *  - {String} options.defaultParamCharset
    *  - {Object} options.limits
    *  - {Function} options.checkFile
    */
-  async saveRequestFiles(options) {
-    options = options || {};
+  async saveRequestFiles(options = {}) {
     const ctx = this;
 
-    const multipartOptions = {
-      autoFields: false,
-    };
-    if (options.defCharset) multipartOptions.defCharset = options.defCharset;
-    if (options.limits) multipartOptions.limits = options.limits;
-    if (options.checkFile) multipartOptions.checkFile = options.checkFile;
     const allowArrayField = ctx.app.config.multipart.allowArrayField;
 
     let storedir;
@@ -77,7 +70,8 @@ module.exports = {
     const requestBody = {};
     const requestFiles = [];
 
-    const parts = ctx.multipart(multipartOptions);
+    options.autoFields = false;
+    const parts = ctx.multipart(options);
     let part;
     do {
       try {
@@ -166,7 +160,8 @@ module.exports = {
    * @function Context#multipart
    * @param {Object} [options] - override default multipart configurations
    *  - {Boolean} options.autoFields
-   *  - {String} options.defCharset
+   *  - {String} options.defaultCharset
+   *  - {String} options.defaultParamCharset
    *  - {Object} options.limits
    *  - {Function} options.checkFile
    * @return {Yieldable} parts
@@ -179,21 +174,27 @@ module.exports = {
     if (this[HAS_CONSUMED]) throw new TypeError('the multipart request can\'t be consumed twice');
 
     this[HAS_CONSUMED] = true;
-    const parseOptions = Object.assign({}, this.app.config.multipartParseOptions);
-    options = options || {};
-    if (typeof options.autoFields === 'boolean') parseOptions.autoFields = options.autoFields;
-    if (options.defCharset) parseOptions.defCharset = options.defCharset;
-    if (options.checkFile) parseOptions.checkFile = options.checkFile;
-    // merge and create a new limits object
-    if (options.limits) {
-      const limits = options.limits;
-      for (const key in limits) {
-        if (/^\w+Size$/.test(key)) {
-          limits[key] = bytes(limits[key]);
-        }
-      }
-      parseOptions.limits = Object.assign({}, parseOptions.limits, limits);
-    }
+
+    const multipartConfig = this.app.config.multipart;
+    options = extractOptions(options);
+
+    const parseOptions = Object.assign({
+      autoFields: multipartConfig.autoFields,
+      defCharset: multipartConfig.defaultCharset,
+      defParamCharset: multipartConfig.defaultParamCharset,
+      checkFile: multipartConfig.checkFile,
+    }, options);
+
+    // https://github.com/mscdex/busboy#busboy-methods
+    // merge limits
+    parseOptions.limits = Object.assign({
+      fieldNameSize: multipartConfig.fieldNameSize,
+      fieldSize: multipartConfig.fieldSize,
+      fields: multipartConfig.fields,
+      fileSize: multipartConfig.fileSize,
+      files: multipartConfig.files,
+    }, options.limits);
+
     return parse(this, parseOptions);
   },
 
@@ -208,21 +209,16 @@ module.exports = {
    * @function Context#getFileStream
    * @param {Object} options
    *  - {Boolean} options.requireFile - required file submit, default is true
-   *  - {String} options.defCharset
+   *  - {String} options.defaultCharset
+   *  - {String} options.defaultParamCharset
    *  - {Object} options.limits
    *  - {Function} options.checkFile
    * @return {ReadStream} stream
    * @since 1.0.0
    */
-  async getFileStream(options) {
-    options = options || {};
-    const multipartOptions = {
-      autoFields: true,
-    };
-    if (options.defCharset) multipartOptions.defCharset = options.defCharset;
-    if (options.limits) multipartOptions.limits = options.limits;
-    if (options.checkFile) multipartOptions.checkFile = options.checkFile;
-    const parts = this.multipart(multipartOptions);
+  async getFileStream(options = {}) {
+    options.autoFields = true;
+    const parts = this.multipart(options);
     let stream = await parts();
 
     if (options.requireFile !== false) {
@@ -261,3 +257,28 @@ module.exports = {
     return stream;
   },
 };
+
+function extractOptions(options = {}) {
+  const opts = {};
+  if (typeof options.autoFields === 'boolean') opts.autoFields = options.autoFields;
+  if (options.limits) opts.limits = options.limits;
+  if (options.checkFile) opts.checkFile = options.checkFile;
+
+  if (options.defCharset) opts.defCharset = options.defCharset;
+  if (options.defParamCharset) opts.defParamCharset = options.defParamCharset;
+  // compatible with config names
+  if (options.defaultCharset) opts.defCharset = options.defaultCharset;
+  if (options.defaultParamCharset) opts.defParamCharset = options.defaultParamCharset;
+
+  // limits
+  if (options.limits) {
+    opts.limits = Object.assign({}, options.limits);
+    for (const key in opts.limits) {
+      if (key.endsWith('Size')) {
+        opts.limits[key] = bytes(opts.limits[key]);
+      }
+    }
+  }
+
+  return opts;
+}

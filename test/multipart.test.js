@@ -474,6 +474,24 @@ describe('test/multipart.test.js', () => {
       });
     });
 
+    it('should handle non-ascii filename', async () => {
+      const file = path.join(__dirname, 'fixtures', '中文名.js');
+      const form = formstream();
+      form.file('file', file);
+
+      const headers = form.headers();
+      const url = host + '/upload/async';
+      const res = await urllib.request(url, {
+        method: 'POST',
+        headers,
+        stream: form,
+        dataType: 'json',
+      });
+
+      const data = res.data;
+      assert(data.name.includes('中文名'));
+    });
+
     it('should 400 when no file upload', async () => {
       const form = formstream();
       form.field('hi', 'ok');

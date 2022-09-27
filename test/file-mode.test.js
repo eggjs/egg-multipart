@@ -7,6 +7,7 @@ const path = require('path');
 const mock = require('egg-mock');
 const fs = require('fs').promises;
 const dayjs = require('dayjs');
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 describe('test/file-mode.test.js', () => {
   let app;
@@ -161,6 +162,15 @@ describe('test/file-mode.test.js', () => {
     assert(res.status === 200);
     const data = JSON.parse(res.data);
     assert(data.files.length === 10);
+  });
+
+  it('should handle non-ascii filename', async () => {
+    const file = path.join(__dirname, 'fixtures', '中文名.js');
+    const res = await app.httpRequest()
+      .post('/upload')
+      .attach('file', file);
+    assert(res.status === 200);
+    assert(res.body.files[0].filename === '中文名.js');
   });
 
   it('should throw error when request fields limit', async () => {
@@ -335,6 +345,7 @@ describe('test/file-mode.test.js', () => {
     it('should remove nothing', async () => {
       app.mockLog();
       await app.runSchedule(path.join(__dirname, '../app/schedule/clean_tmpdir'));
+      await sleep(1000);
       app.expectLog('[egg-multipart:CleanTmpdir] start clean tmpdir: "', 'coreLogger');
       app.expectLog('[egg-multipart:CleanTmpdir] end', 'coreLogger');
     });
