@@ -42,7 +42,7 @@ describe('test/multipart-for-await.test.js', () => {
     assert(data.fields.foo === 'bar');
     assert(data.fields.love === 'egg');
     assert(data.files.file1.fileName === '中文名.js');
-    assert(data.files.file1.content === 'hello\n');
+    assert(data.files.file1.content.includes('hello'));
     assert(data.files.file2.fileName === 'testfile.js');
     assert(data.files.file2.content === 'this is a test file\n');
   });
@@ -52,7 +52,7 @@ describe('test/multipart-for-await.test.js', () => {
       const form = formstream();
       form.field('foo', 'bar');
       form.field('love', 'egg');
-      // form.file('file1', path.join(__dirname, 'fixtures/中文名.js'));
+      form.file('file1', path.join(__dirname, 'fixtures/中文名.js'));
       form.file('file2', path.join(__dirname, 'fixtures/bigfile.js'));
 
       const res = await urllib.request(host + '/upload', {

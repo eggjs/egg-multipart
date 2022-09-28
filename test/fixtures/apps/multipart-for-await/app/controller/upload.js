@@ -15,7 +15,6 @@ module.exports = class UploadController extends Controller {
         fields[name] = value;
       } else {
         const { filename, fieldname } = part;
-        console.log('###', part.truncated)
         let content = '';
         for await(const chunk of part) {
           content += chunk.toString();
