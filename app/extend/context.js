@@ -103,6 +103,10 @@ module.exports = {
           const filepath = path.join(storedir, uuid.v4() + path.extname(meta.filename));
           const target = createWriteStream(filepath);
           await pipeline(part, target);
+
+          // truncated is only set true after begin consume the stream
+          if (part.truncated) limit('Request_fileSize_limit', 'Reach fileSize limit');
+
           // https://github.com/mscdex/busboy/blob/master/lib/types/multipart.js#L221
           meta.filepath = filepath;
           requestFiles.push(meta);
