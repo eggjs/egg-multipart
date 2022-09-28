@@ -44,7 +44,7 @@ describe('test/multipart-for-await.test.js', () => {
     assert(data.files.file1.fileName === '中文名.js');
     assert(data.files.file1.content.includes('hello'));
     assert(data.files.file2.fileName === 'testfile.js');
-    assert(data.files.file2.content === 'this is a test file\n');
+    assert(data.files.file2.content.includes('this is a test file'));
   });
 
   describe('should throw when limit', () => {

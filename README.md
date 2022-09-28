@@ -246,7 +246,7 @@ module.exports = class extends Controller {
 
 If you're well-known about know the Node.js Stream work, you should use the `stream` mode.
 
-### Use with `for await of`
+### Use with `for await...of`
 
 ```html
 <form method="POST" action="/upload?_csrf={{ ctx.csrf | safe }}" enctype="multipart/form-data">
