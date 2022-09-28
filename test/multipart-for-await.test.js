@@ -6,7 +6,7 @@ const urllib = require('urllib');
 const path = require('path');
 const mock = require('egg-mock');
 
-describe.only('test/multipart-for-await.test.js', () => {
+describe('test/multipart-for-await.test.js', () => {
   let app;
   let server;
   let host;
