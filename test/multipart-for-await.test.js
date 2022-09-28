@@ -23,7 +23,7 @@ describe('test/multipart-for-await.test.js', () => {
   beforeEach(() => app.mockCsrf());
   afterEach(mock.restore);
 
-  it('should suport for await...of', async () => {
+  it('should suport for-await-of', async () => {
     const form = formstream();
     form.field('foo', 'bar');
     form.field('love', 'egg');

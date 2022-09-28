@@ -24,8 +24,9 @@ module.exports = class UploadController extends Controller {
         let content = '';
         await pipeline(part,
           new stream.Writable({
-            write(chunk, encding, callback) {
+            write(chunk, encoding, callback) {
               content += chunk.toString();
+              // console.log('@@', part.filename, part.truncated);
               if (shouldMockError) {
                 return callback(new Error('mock error'));
               }
@@ -33,7 +34,6 @@ module.exports = class UploadController extends Controller {
             },
           }),
         );
-
         files[fieldname] = {
           fileName: filename,
           content,

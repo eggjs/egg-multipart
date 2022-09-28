@@ -282,16 +282,6 @@ module.exports = class UploadController extends Controller {
         // otherwise, it's a stream
         const { filename, fieldname, encoding, mime } = part;
 
-        // user click `upload` before choose a file, `part` will be file stream, but `part.filename` is empty must handler this, such as log error.
-        if (!filename) {
-          await pipeline(part, new stream.Writable({
-            write(chunk, encding, callback) {
-              setImmediate(callback);
-            }
-          });
-          continue;
-        }
-
         console.log('field: ' + fieldname);
         console.log('filename: ' + filename);
         console.log('encoding: ' + encoding);

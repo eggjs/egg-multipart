@@ -24,15 +24,15 @@ class EmptyWriteStream extends stream.Writable {
   }
 }
 
-const HAS_CONSUMED = Symbol('Context#multipartHasConsumed');
-
-function limit(code, message) {
-  // throw 413 error
-  const err = new Error(message);
-  err.code = code;
-  err.status = 413;
-  throw err;
+class LimitError extends Error {
+  constructor(code, message) {
+    super(message);
+    this.code = code;
+    this.status = 413;
+  }
 }
+
+const HAS_CONSUMED = Symbol('Context#multipartHasConsumed');
 
 module.exports = {
   /**
@@ -77,13 +77,19 @@ module.exports = {
           // stream
           const { filename, fieldname, encoding, mime } = part;
 
-          // user click `upload` before choose a file, `part` will be file stream, but `part.filename` is empty must handler this, such as log error.
-          if (!filename) {
-            await pipeline(part, new EmptyWriteStream());
-            continue;
+          if (!storedir) {
+            // ${tmpdir}/YYYY/MM/DD/HH
+            storedir = path.join(ctx.app.config.multipart.tmpdir, dayjs().format('YYYY/MM/DD/HH'));
+            await fs.mkdir(storedir, { recursive: true });
           }
 
+          // write to tmp file
+          const filepath = path.join(storedir, uuid.v4() + path.extname(filename));
+          const target = createWriteStream(filepath);
+          await pipeline(part, checkFileSizeLimit, target);
+
           const meta = {
+            filepath,
             field: fieldname,
             filename,
             encoding,
@@ -94,21 +100,6 @@ module.exports = {
             mimeType: mime,
           };
 
-          if (!storedir) {
-            // ${tmpdir}/YYYY/MM/DD/HH
-            storedir = path.join(ctx.app.config.multipart.tmpdir, dayjs().format('YYYY/MM/DD/HH'));
-            await fs.mkdir(storedir, { recursive: true });
-          }
-
-          const filepath = path.join(storedir, uuid.v4() + path.extname(meta.filename));
-          const target = createWriteStream(filepath);
-          await pipeline(part, target);
-
-          // truncated is only set true after begin consume the stream
-          if (part.truncated) limit('Request_fileSize_limit', 'Reach fileSize limit');
-
-          // https://github.com/mscdex/busboy/blob/master/lib/types/multipart.js#L221
-          meta.filepath = filepath;
           requestFiles.push(meta);
         }
       }
@@ -165,17 +156,36 @@ module.exports = {
       let part;
       do {
         part = await parts();
+
         if (!part) continue;
+
         if (Array.isArray(part)) {
-          if (part[3]) limit('Request_fieldSize_limit', 'Reach fieldSize limit');
+          if (part[3]) throw new LimitError('Request_fieldSize_limit', 'Reach fieldSize limit');
           // TODO: still not support at busboy 1.x (only support at urlencoded)
           // https://github.com/mscdex/busboy/blob/v0.3.1/lib/types/multipart.js#L5
           // https://github.com/mscdex/busboy/blob/master/lib/types/multipart.js#L251
-          // if (part[2]) limit('Request_fieldNameSize_limit', 'Reach fieldNameSize limit');
-        } else if (part.truncated) {
-          limit('Request_fileSize_limit', 'Reach fileSize limit');
+          // if (part[2]) throw new LimitError('Request_fieldNameSize_limit', 'Reach fieldNameSize limit');
+        } else {
+          // user click `upload` before choose a file, `part` will be file stream, but `part.filename` is empty must handler this, such as log error.
+          if (!part.filename) {
+            await pipeline(part, new EmptyWriteStream());
+            continue;
+          }
+
+          // TODO: check whether filename is malicious input
+
+          // TODO: busboy only set truncated when consume the stream
+          part.once('limit', function() {
+            this.emit('error', new LimitError('Request_fileSize_limit', 'Reach fileSize limit'));
+          });
+          // TODO: busboy only set truncated when consume the stream
+          // if (part.truncated) {
+          //   throw new LimitError('Request_fileSize_limit', 'Reach fileSize limit');
+          // }
         }
+
         yield part;
+
       } while (part !== undefined);
     };
     return parts;
@@ -216,7 +226,7 @@ module.exports = {
     }
 
     if (stream.truncated) {
-      limit('Request_fileSize_limit', 'Request file too large, please check multipart config');
+      throw new LimitError('Request_fileSize_limit', 'Request file too large, please check multipart config');
     }
 
     stream.fields = parts.field;
@@ -261,6 +271,22 @@ module.exports = {
     }
   },
 };
+
+// function limit(code, message) {
+//   // throw 413 error
+//   const err = new Error(message);
+//   err.code = code;
+//   err.status = 413;
+//   throw err;
+// }
+
+async function* checkFileSizeLimit(part) {
+  for await (const chunk of part) {
+    // truncated is only set true after begin consume the stream
+    if (part.truncated) throw new LimitError('Request_fileSize_limit', 'Reach fileSize limit');
+    yield chunk;
+  }
+}
 
 function extractOptions(options = {}) {
   const opts = {};

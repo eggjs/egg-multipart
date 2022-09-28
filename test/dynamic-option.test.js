@@ -37,6 +37,7 @@ describe('test/dynamic-option.test.js', () => {
       method: 'POST',
       headers,
       stream: form,
+      // dataType: 'json',
     });
 
     assert(res.status === 413);
