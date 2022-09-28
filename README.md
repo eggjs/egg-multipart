@@ -246,7 +246,68 @@ module.exports = class extends Controller {
 
 If you're well-known about know the Node.js Stream work, you should use the `stream` mode.
 
-### Upload One File
+### Use with `for await...of`
+
+```html
+<form method="POST" action="/upload?_csrf={{ ctx.csrf | safe }}" enctype="multipart/form-data">
+  title: <input name="title" />
+  file1: <input name="file1" type="file" />
+  file2: <input name="file2" type="file" />
+  <button type="submit">Upload</button>
+</form>
+```
+
+Controller which hanlder `POST /upload`:
+
+```js
+// app/controller/upload.js
+const { Controller } = require('egg');
+const fs = require('fs');
+const stream = require('stream');
+const util = require('util');
+const pipeline = util.promisify(stream.pipeline);
+
+module.exports = class UploadController extends Controller {
+  async upload() {
+    const parts = this.ctx.multipart();
+    const fields = {};
+    const files = {};
+
+    for await (const part of parts) {
+      if (Array.isArray(part)) {
+        // fields
+        console.log('field: ' + part[0]);
+        console.log('value: ' + part[1]);
+      } else {
+        // otherwise, it's a stream
+        const { filename, fieldname, encoding, mime } = part;
+
+        // user click `upload` before choose a file, `part` will be file stream, but `part.filename` is empty must handler this, such as log error.
+        if (!filename) continue;
+
+        console.log('field: ' + fieldname);
+        console.log('filename: ' + filename);
+        console.log('encoding: ' + encoding);
+        console.log('mime: ' + mime);
+
+        // how to handler?
+        // 1. save to tmpdir with pipeline
+        // 2. or send to oss
+        // 3. or just consume it with another for await
+
+        // WARNING: You should almost never use the origin filename as it could contain malicious input.
+        const targetPath = path.join(os.tmpdir(), uuid.v4() + path.extname(meta.filename));
+        await pipeline(part, createWriteStream(targetPath)); // use `pipeline` not `pipe`
+      }
+    }
+
+    this.ctx.body = 'ok';
+  }
+};
+```
+
+
+### Upload One File (DEPRECATED)
 
 You can got upload stream by `ctx.getFileStream*()`.
 
@@ -258,7 +319,7 @@ You can got upload stream by `ctx.getFileStream*()`.
 </form>
 ```
 
-Controller which hanlder `POST /upload`:
+Controller which handler `POST /upload`:
 
 ```js
 // app/controller/upload.js
@@ -305,7 +366,7 @@ module.exports = class extends Controller {
 };
 ```
 
-### Upload Multiple Files
+### Upload Multiple Files (DEPRECATED)
 
 ```html
 <form method="POST" action="/upload?_csrf={{ ctx.csrf | safe }}" enctype="multipart/form-data">

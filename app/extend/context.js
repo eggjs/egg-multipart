@@ -195,7 +195,26 @@ module.exports = {
       files: multipartConfig.files,
     }, options.limits);
 
-    return parse(this, parseOptions);
+    // mount asyncIterator, so we can use `for await` to get parts
+    const parts = parse(this, parseOptions);
+    parts[Symbol.asyncIterator] = async function* () {
+      let part;
+      do {
+        part = await parts();
+        if (!part) continue;
+        if (Array.isArray(part)) {
+          if (part[3]) limit('Request_fieldSize_limit', 'Reach fieldSize limit');
+          // TODO: still not support at busboy 1.x (only support at urlencoded)
+          // https://github.com/mscdex/busboy/blob/v0.3.1/lib/types/multipart.js#L5
+          // https://github.com/mscdex/busboy/blob/master/lib/types/multipart.js#L251
+          // if (part[2]) limit('Request_fieldNameSize_limit', 'Reach fieldNameSize limit');
+        } else if (part.truncated) {
+          limit('Request_fileSize_limit', 'Reach fileSize limit');
+        }
+        yield part;
+      } while (part !== undefined);
+    };
+    return parts;
   },
 
   /**
