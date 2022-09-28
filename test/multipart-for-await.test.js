@@ -6,7 +6,7 @@ const urllib = require('urllib');
 const path = require('path');
 const mock = require('egg-mock');
 
-describe('test/multipart-for-await.test.js', () => {
+describe.only('test/multipart-for-await.test.js', () => {
   let app;
   let server;
   let host;
@@ -38,13 +38,29 @@ describe('test/multipart-for-await.test.js', () => {
     });
 
     const data = res.data;
-    console.log(data);
+    // console.log(data);
     assert(data.fields.foo === 'bar');
     assert(data.fields.love === 'egg');
     assert(data.files.file1.fileName === '中文名.js');
     assert(data.files.file1.content.includes('hello'));
     assert(data.files.file2.fileName === 'testfile.js');
     assert(data.files.file2.content.includes('this is a test file'));
+  });
+
+  it('should auto consumed file stream on error throw', async () => {
+    const form = formstream();
+    form.field('foo', 'bar');
+    form.field('love', 'egg');
+    form.file('file2', path.join(__dirname, 'fixtures/testfile.js'));
+
+    const res = await urllib.request(host + '/upload?mock_error=true', {
+      method: 'POST',
+      headers: form.headers(),
+      stream: form,
+      dataType: 'json',
+    });
+
+    assert(res.data.message === 'mock error');
   });
 
   describe('should throw when limit', () => {
