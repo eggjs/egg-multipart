@@ -224,7 +224,7 @@ describe('test/file-mode.test.js', () => {
   });
 
   // fieldNameSize is TODO on busboy
-  // see https://github.com/mscdex/busboy/blob/master/lib/types/multipart.js#L5
+  // see https://github.com/mscdex/busboy/blob/v0.3.1/lib/types/multipart.js#L5
   it.skip('should throw error when request field name size limit', async () => {
     const form = formstream();
     form.field('b'.repeat(101), 'a');
