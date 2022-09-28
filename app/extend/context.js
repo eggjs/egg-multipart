@@ -1,10 +1,9 @@
 'use strict';
 
-const Readable = require('stream').Readable;
+const assert = require('assert');
 const path = require('path');
 const uuid = require('uuid');
 const parse = require('co-busboy');
-const sendToWormhole = require('stream-wormhole');
 const fs = require('fs').promises;
 const { createWriteStream } = require('fs');
 const bytes = require('humanize-bytes');
@@ -13,9 +12,15 @@ const stream = require('stream');
 const util = require('util');
 const pipeline = util.promisify(stream.pipeline);
 
-class EmptyStream extends Readable {
+class EmptyStream extends stream.Readable {
   _read() {
     this.push(null);
+  }
+}
+
+class EmptyWriteStream extends stream.Writable {
+  write(chunk, encding, callback) {
+    setImmediate(callback);
   }
 }
 
@@ -30,27 +35,6 @@ function limit(code, message) {
 }
 
 module.exports = {
-  /**
-   * clean up request tmp files helper
-   * @function Context#cleanupRequestFiles
-   * @param {Array<String>} [files] - file paths need to clenup, default is `ctx.request.files`.
-   */
-  async cleanupRequestFiles(files) {
-    if (!files || !files.length) {
-      files = this.request.files;
-    }
-    if (Array.isArray(files)) {
-      for (const file of files) {
-        try {
-          await fs.rm(file.filepath, { force: true, recursive: true });
-        } catch (err) {
-          // warning log
-          this.coreLogger.warn('[egg-multipart-cleanupRequestFiles-error] file: %j, error: %s', file, err);
-        }
-      }
-    }
-  },
-
   /**
    * save request multipart data and files to `ctx.request`
    * @function Context#saveRequestFiles
@@ -72,84 +56,62 @@ module.exports = {
 
     options.autoFields = false;
     const parts = ctx.multipart(options);
-    let part;
-    do {
-      try {
-        part = await parts();
-      } catch (err) {
-        await ctx.cleanupRequestFiles(requestFiles);
-        throw err;
-      }
 
-      if (!part) break;
-
-      if (part.length) {
-        ctx.coreLogger.debug('[egg-multipart:storeMultipart] handle value part: %j', part);
-        const fieldnameTruncated = part[2];
-        const valueTruncated = part[3];
-        if (valueTruncated) {
-          await ctx.cleanupRequestFiles(requestFiles);
-          limit('Request_fieldSize_limit', 'Reach fieldSize limit');
-        }
-        if (fieldnameTruncated) {
-          await ctx.cleanupRequestFiles(requestFiles);
-          limit('Request_fieldNameSize_limit', 'Reach fieldNameSize limit');
-        }
-
-        // arrays are busboy fields
-        const [ filedName, fieldValue ] = part;
-        if (!allowArrayField) {
-          requestBody[filedName] = fieldValue;
-        } else {
-          if (!requestBody[filedName]) {
-            requestBody[filedName] = fieldValue;
-          } else if (!Array.isArray(requestBody[filedName])) {
-            requestBody[filedName] = [ requestBody[filedName], fieldValue ];
+    try {
+      for await (const part of parts) {
+        if (Array.isArray(part)) {
+          // fields
+          const [ fieldName, fieldValue ] = part;
+          if (!allowArrayField) {
+            requestBody[fieldName] = fieldValue;
           } else {
-            requestBody[filedName].push(fieldValue);
+            if (!requestBody[fieldName]) {
+              requestBody[fieldName] = fieldValue;
+            } else if (!Array.isArray(requestBody[fieldName])) {
+              requestBody[fieldName] = [ requestBody[fieldName], fieldValue ];
+            } else {
+              requestBody[fieldName].push(fieldValue);
+            }
           }
+        } else {
+          // stream
+          const { filename, fieldname, encoding, mime } = part;
+
+          // user click `upload` before choose a file, `part` will be file stream, but `part.filename` is empty must handler this, such as log error.
+          if (!filename) {
+            await pipeline(part, new EmptyWriteStream());
+            continue;
+          }
+
+          const meta = {
+            field: fieldname,
+            filename,
+            encoding,
+            mime,
+            // keep same property name as file stream, https://github.com/cojs/busboy/blob/master/index.js#L114
+            fieldname,
+            transferEncoding: encoding,
+            mimeType: mime,
+          };
+
+          if (!storedir) {
+            // ${tmpdir}/YYYY/MM/DD/HH
+            storedir = path.join(ctx.app.config.multipart.tmpdir, dayjs().format('YYYY/MM/DD/HH'));
+            await fs.mkdir(storedir, { recursive: true });
+          }
+
+          const filepath = path.join(storedir, uuid.v4() + path.extname(meta.filename));
+          const target = createWriteStream(filepath);
+          await pipeline(part, target);
+          // https://github.com/mscdex/busboy/blob/master/lib/types/multipart.js#L221
+          meta.filepath = filepath;
+          requestFiles.push(meta);
         }
-        continue;
       }
-
-      // otherwise, it's a stream
-      const meta = {
-        field: part.fieldname,
-        filename: part.filename,
-        encoding: part.encoding,
-        mime: part.mime,
-      };
-      // keep same property name as file stream
-      // https://github.com/cojs/busboy/blob/master/index.js#L114
-      meta.fieldname = meta.field;
-      meta.transferEncoding = meta.encoding;
-      meta.mimeType = meta.mime;
-
-      ctx.coreLogger.debug('[egg-multipart:storeMultipart] handle stream part: %j', meta);
-      // empty part, ignore it
-      if (!part.filename) {
-        await sendToWormhole(part);
-        continue;
-      }
-
-      if (!storedir) {
-        // ${tmpdir}/YYYY/MM/DD/HH
-        storedir = path.join(ctx.app.config.multipart.tmpdir, dayjs().format('YYYY/MM/DD/HH'));
-        await fs.mkdir(storedir, { recursive: true });
-      }
-      const filepath = path.join(storedir, uuid.v4() + path.extname(meta.filename));
-      const target = createWriteStream(filepath);
-      await pipeline(part, target);
-      // https://github.com/mscdex/busboy/blob/master/lib/types/multipart.js#L221
-      meta.filepath = filepath;
-      requestFiles.push(meta);
-
-      // https://github.com/mscdex/busboy/blob/master/lib/types/multipart.js#L221
-      if (part.truncated) {
-        await ctx.cleanupRequestFiles(requestFiles);
-        limit('Request_fileSize_limit', 'Reach fileSize limit');
-      }
-    } while (part != null);
+    } catch (err) {
+      await ctx.cleanupRequestFiles(requestFiles);
+      throw err;
+    }
 
     ctx.request.body = requestBody;
     ctx.request.files = requestFiles;
@@ -168,10 +130,8 @@ module.exports = {
    */
   multipart(options) {
     // multipart/form-data
-    if (!this.is('multipart')) {
-      this.throw(400, 'Content-Type must be multipart/*');
-    }
-    if (this[HAS_CONSUMED]) throw new TypeError('the multipart request can\'t be consumed twice');
+    if (!this.is('multipart')) this.throw(400, 'Content-Type must be multipart/*');
+    assert(!this[HAS_CONSUMED], 'the multipart request can\'t be consumed twice');
 
     this[HAS_CONSUMED] = true;
 
@@ -274,6 +234,27 @@ module.exports = {
       stream.resume();
     });
     return stream;
+  },
+
+  /**
+   * clean up request tmp files helper
+   * @function Context#cleanupRequestFiles
+   * @param {Array<String>} [files] - file paths need to clenup, default is `ctx.request.files`.
+   */
+  async cleanupRequestFiles(files) {
+    if (!files || !files.length) {
+      files = this.request.files;
+    }
+    if (Array.isArray(files)) {
+      for (const file of files) {
+        try {
+          await fs.rm(file.filepath, { force: true, recursive: true });
+        } catch (err) {
+          // warning log
+          this.coreLogger.warn('[egg-multipart-cleanupRequestFiles-error] file: %j, error: %s', file, err);
+        }
+      }
+    }
   },
 };
 

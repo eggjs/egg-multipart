@@ -293,7 +293,7 @@ describe('test/file-mode.test.js', () => {
     });
 
     assert(res.status === 500);
-    assert(res.data.toString().includes('TypeError: the multipart request can\'t be consumed twice'));
+    assert(res.data.toString().includes('the multipart request can\'t be consumed twice'));
   });
 
   it('should use cleanupRequestFiles after request end', async () => {
