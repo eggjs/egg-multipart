@@ -9,20 +9,9 @@ const { createWriteStream } = require('fs');
 const bytes = require('humanize-bytes');
 const dayjs = require('dayjs');
 const stream = require('stream');
+const { Readable, Writable } = stream;
 const util = require('util');
 const pipeline = util.promisify(stream.pipeline);
-
-class EmptyStream extends stream.Readable {
-  _read() {
-    this.push(null);
-  }
-}
-
-class EmptyWriteStream extends stream.Writable {
-  write(chunk, encding, callback) {
-    setImmediate(callback);
-  }
-}
 
 class LimitError extends Error {
   constructor(code, message) {
@@ -47,14 +36,15 @@ module.exports = {
    * @return {Yieldable} parts
    */
   multipart(options) {
+    const ctx = this;
     // multipart/form-data
-    if (!this.is('multipart')) this.throw(400, 'Content-Type must be multipart/*');
-    assert(!this[HAS_CONSUMED], 'the multipart request can\'t be consumed twice');
+    if (!ctx.is('multipart')) ctx.throw(400, 'Content-Type must be multipart/*');
 
-    this[HAS_CONSUMED] = true;
+    assert(!ctx[HAS_CONSUMED], 'the multipart request can\'t be consumed twice');
+    ctx[HAS_CONSUMED] = true;
 
-    const { autoFields, defaultCharset, defaultParamCharset, checkFile } = this.app.config.multipart;
-    const { fieldNameSize, fieldSize, fields, fileSize, files } = this.app.config.multipart;
+    const { autoFields, defaultCharset, defaultParamCharset, checkFile } = ctx.app.config.multipart;
+    const { fieldNameSize, fieldSize, fields, fileSize, files } = ctx.app.config.multipart;
     options = extractOptions(options);
 
     const parseOptions = Object.assign({
@@ -92,7 +82,12 @@ module.exports = {
         } else {
           // user click `upload` before choose a file, `part` will be file stream, but `part.filename` is empty must handler this, such as log error.
           if (!part.filename) {
-            await pipeline(part, new EmptyWriteStream());
+            ctx.coreLogger.debug('[egg-multipart] file field `%s` is upload without file stream, will drop it.', part.fieldname);
+            await pipeline(part, new Writable({
+              write(chunk, encding, callback) {
+                setImmediate(callback);
+              },
+            }));
             continue;
           }
           // TODO: check whether filename is malicious input
@@ -100,15 +95,19 @@ module.exports = {
           // busboy only set truncated when consume the stream
           if (part.truncated) {
             // in case of emit 'limit' too fast
+            ctx.coreLogger.debug('[egg-multipart] file `%s` reach filesize limit.', part.filename);
             throw new LimitError('Request_fileSize_limit', 'Reach fileSize limit');
           } else {
+            // eslint-disable-next-line no-loop-func
             part.once('limit', function() {
+              ctx.coreLogger.debug('[egg-multipart] file `%s` reach filesize limit.', part.filename);
               this.emit('error', new LimitError('Request_fileSize_limit', 'Reach fileSize limit'));
               // this.resume();
             });
           }
         }
 
+        // dispatch part to outter logic such as for-await-of
         yield part;
 
       } while (part !== undefined);
@@ -220,7 +219,7 @@ module.exports = {
     }
 
     if (!stream) {
-      stream = new EmptyStream();
+      stream = Readable.from([]);
     }
 
     if (stream.truncated) {
