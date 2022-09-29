@@ -84,12 +84,12 @@ module.exports = {
           if (!part.filename) {
             ctx.coreLogger.debug('[egg-multipart] file field `%s` is upload without file stream, will drop it.', part.fieldname);
 
-            await pipeline(part, new Writable({
-              write(chunk, encding, callback) {
-                console.log('@@ call this?', chunk.toString());
-                setImmediate(callback);
-              },
-            }));
+            // await pipeline(part, new Writable({
+            //   write(chunk, encding, callback) {
+            //     console.log('@@ call this?', chunk.toString());
+            //     setImmediate(callback);
+            //   },
+            // }));
 
             // await pipeline(part, new stream.PassThrough());
 
