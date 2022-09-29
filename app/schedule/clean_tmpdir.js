@@ -5,7 +5,7 @@ const fs = require('fs').promises;
 const dayjs = require('dayjs');
 
 module.exports = app => {
-  return class CleanTmpdir extends (app.Subscription || app.BaseContextClass) {
+  return class CleanTmpdir extends app.Subscription {
     static get schedule() {
       return {
         type: 'worker',
@@ -23,8 +23,8 @@ module.exports = app => {
           await fs.rm(dir, { force: true, recursive: true });
           ctx.coreLogger.info('[egg-multipart:CleanTmpdir:success] tmpdir: %j has been removed', dir);
         } catch (err) {
-          ctx.coreLogger.error('[egg-multipart:CleanTmpdir:error] remove tmpdir: %j error: %s',
-            dir, err);
+          /* c8 ignore next 3 */
+          ctx.coreLogger.error('[egg-multipart:CleanTmpdir:error] remove tmpdir: %j error: %s', dir, err);
           ctx.coreLogger.error(err);
         }
       }

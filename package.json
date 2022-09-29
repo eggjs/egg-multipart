@@ -14,7 +14,7 @@
     "lint": "eslint .",
     "test": "npm run lint -- --fix && npm run test-local",
     "test-local": "egg-bin test",
-    "cov": "egg-bin cov",
+    "cov": "egg-bin cov --c8-report",
     "ci": "egg-bin pkgfiles && npm run lint && npm run cov",
     "pkgfiles": "egg-bin pkgfiles"
   },

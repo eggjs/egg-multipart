@@ -36,13 +36,90 @@ const HAS_CONSUMED = Symbol('Context#multipartHasConsumed');
 
 module.exports = {
   /**
-   * save request multipart data and files to `ctx.request`
-   * @function Context#saveRequestFiles
-   * @param {Object} options
+   * create multipart.parts instance, to get separated files.
+   * @function Context#multipart
+   * @param {Object} [options] - override default multipart configurations
+   *  - {Boolean} options.autoFields
    *  - {String} options.defaultCharset
    *  - {String} options.defaultParamCharset
    *  - {Object} options.limits
    *  - {Function} options.checkFile
+   * @return {Yieldable} parts
+   */
+  multipart(options) {
+    // multipart/form-data
+    if (!this.is('multipart')) this.throw(400, 'Content-Type must be multipart/*');
+    assert(!this[HAS_CONSUMED], 'the multipart request can\'t be consumed twice');
+
+    this[HAS_CONSUMED] = true;
+
+    const { autoFields, defaultCharset, defaultParamCharset, checkFile } = this.app.config.multipart;
+    const { fieldNameSize, fieldSize, fields, fileSize, files } = this.app.config.multipart;
+    options = extractOptions(options);
+
+    const parseOptions = Object.assign({
+      autoFields,
+      defCharset: defaultCharset,
+      defParamCharset: defaultParamCharset,
+      checkFile,
+    }, options);
+
+    // https://github.com/mscdex/busboy#busboy-methods
+    // merge limits
+    parseOptions.limits = Object.assign({
+      fieldNameSize,
+      fieldSize,
+      fields,
+      fileSize,
+      files,
+    }, options.limits);
+
+    // mount asyncIterator, so we can use `for await` to get parts
+    const parts = parse(this, parseOptions);
+    parts[Symbol.asyncIterator] = async function* () {
+      let part;
+      do {
+        part = await parts();
+
+        if (!part) continue;
+
+        if (Array.isArray(part)) {
+          if (part[3]) throw new LimitError('Request_fieldSize_limit', 'Reach fieldSize limit');
+          // TODO: still not support at busboy 1.x (only support at urlencoded)
+          // https://github.com/mscdex/busboy/blob/v0.3.1/lib/types/multipart.js#L5
+          // https://github.com/mscdex/busboy/blob/master/lib/types/multipart.js#L251
+          // if (part[2]) throw new LimitError('Request_fieldNameSize_limit', 'Reach fieldNameSize limit');
+        } else {
+          // user click `upload` before choose a file, `part` will be file stream, but `part.filename` is empty must handler this, such as log error.
+          if (!part.filename) {
+            await pipeline(part, new EmptyWriteStream());
+            continue;
+          }
+          // TODO: check whether filename is malicious input
+
+          // busboy only set truncated when consume the stream
+          if (part.truncated) {
+            // in case of emit 'limit' too fast
+            throw new LimitError('Request_fileSize_limit', 'Reach fileSize limit');
+          } else {
+            part.once('limit', function() {
+              this.emit('error', new LimitError('Request_fileSize_limit', 'Reach fileSize limit'));
+              // this.resume();
+            });
+          }
+        }
+
+        yield part;
+
+      } while (part !== undefined);
+    };
+    return parts;
+  },
+
+  /**
+   * save request multipart data and files to `ctx.request`
+   * @function Context#saveRequestFiles
+   * @param {Object} options - { limits, checkFile, ... }
    */
   async saveRequestFiles(options = {}) {
     const ctx = this;
@@ -86,7 +163,7 @@ module.exports = {
           // write to tmp file
           const filepath = path.join(storedir, uuid.v4() + path.extname(filename));
           const target = createWriteStream(filepath);
-          await pipeline(part, checkFileSizeLimit, target);
+          await pipeline(part, target);
 
           const meta = {
             filepath,
@@ -110,85 +187,6 @@ module.exports = {
 
     ctx.request.body = requestBody;
     ctx.request.files = requestFiles;
-  },
-
-  /**
-   * create multipart.parts instance, to get separated files.
-   * @function Context#multipart
-   * @param {Object} [options] - override default multipart configurations
-   *  - {Boolean} options.autoFields
-   *  - {String} options.defaultCharset
-   *  - {String} options.defaultParamCharset
-   *  - {Object} options.limits
-   *  - {Function} options.checkFile
-   * @return {Yieldable} parts
-   */
-  multipart(options) {
-    // multipart/form-data
-    if (!this.is('multipart')) this.throw(400, 'Content-Type must be multipart/*');
-    assert(!this[HAS_CONSUMED], 'the multipart request can\'t be consumed twice');
-
-    this[HAS_CONSUMED] = true;
-
-    const multipartConfig = this.app.config.multipart;
-    options = extractOptions(options);
-
-    const parseOptions = Object.assign({
-      autoFields: multipartConfig.autoFields,
-      defCharset: multipartConfig.defaultCharset,
-      defParamCharset: multipartConfig.defaultParamCharset,
-      checkFile: multipartConfig.checkFile,
-    }, options);
-
-    // https://github.com/mscdex/busboy#busboy-methods
-    // merge limits
-    parseOptions.limits = Object.assign({
-      fieldNameSize: multipartConfig.fieldNameSize,
-      fieldSize: multipartConfig.fieldSize,
-      fields: multipartConfig.fields,
-      fileSize: multipartConfig.fileSize,
-      files: multipartConfig.files,
-    }, options.limits);
-
-    // mount asyncIterator, so we can use `for await` to get parts
-    const parts = parse(this, parseOptions);
-    parts[Symbol.asyncIterator] = async function* () {
-      let part;
-      do {
-        part = await parts();
-
-        if (!part) continue;
-
-        if (Array.isArray(part)) {
-          if (part[3]) throw new LimitError('Request_fieldSize_limit', 'Reach fieldSize limit');
-          // TODO: still not support at busboy 1.x (only support at urlencoded)
-          // https://github.com/mscdex/busboy/blob/v0.3.1/lib/types/multipart.js#L5
-          // https://github.com/mscdex/busboy/blob/master/lib/types/multipart.js#L251
-          // if (part[2]) throw new LimitError('Request_fieldNameSize_limit', 'Reach fieldNameSize limit');
-        } else {
-          // user click `upload` before choose a file, `part` will be file stream, but `part.filename` is empty must handler this, such as log error.
-          if (!part.filename) {
-            await pipeline(part, new EmptyWriteStream());
-            continue;
-          }
-
-          // TODO: check whether filename is malicious input
-
-          // TODO: busboy only set truncated when consume the stream
-          part.once('limit', function() {
-            this.emit('error', new LimitError('Request_fileSize_limit', 'Reach fileSize limit'));
-          });
-          // TODO: busboy only set truncated when consume the stream
-          // if (part.truncated) {
-          //   throw new LimitError('Request_fileSize_limit', 'Reach fileSize limit');
-          // }
-        }
-
-        yield part;
-
-      } while (part !== undefined);
-    };
-    return parts;
   },
 
   /**
@@ -272,22 +270,6 @@ module.exports = {
   },
 };
 
-// function limit(code, message) {
-//   // throw 413 error
-//   const err = new Error(message);
-//   err.code = code;
-//   err.status = 413;
-//   throw err;
-// }
-
-async function* checkFileSizeLimit(part) {
-  for await (const chunk of part) {
-    // truncated is only set true after begin consume the stream
-    if (part.truncated) throw new LimitError('Request_fileSize_limit', 'Reach fileSize limit');
-    yield chunk;
-  }
-}
-
 function extractOptions(options = {}) {
   const opts = {};
   if (typeof options.autoFields === 'boolean') opts.autoFields = options.autoFields;
@@ -304,7 +286,7 @@ function extractOptions(options = {}) {
   if (options.limits) {
     opts.limits = Object.assign({}, options.limits);
     for (const key in opts.limits) {
-      if (key.endsWith('Size')) {
+      if (key.endsWith('Size') && opts.limits[key]) {
         opts.limits[key] = bytes(opts.limits[key]);
       }
     }
