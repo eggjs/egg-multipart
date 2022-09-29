@@ -282,9 +282,6 @@ module.exports = class UploadController extends Controller {
         // otherwise, it's a stream
         const { filename, fieldname, encoding, mime } = part;
 
-        // user click `upload` before choose a file, `part` will be file stream, but `part.filename` is empty must handler this, such as log error.
-        if (!filename) continue;
-
         console.log('field: ' + fieldname);
         console.log('filename: ' + filename);
         console.log('encoding: ' + encoding);
@@ -296,7 +293,7 @@ module.exports = class UploadController extends Controller {
         // 3. or just consume it with another for await
 
         // WARNING: You should almost never use the origin filename as it could contain malicious input.
-        const targetPath = path.join(os.tmpdir(), uuid.v4() + path.extname(meta.filename));
+        const targetPath = path.join(os.tmpdir(), uuid.v4() + path.extname(filename));
         await pipeline(part, createWriteStream(targetPath)); // use `pipeline` not `pipe`
       }
     }

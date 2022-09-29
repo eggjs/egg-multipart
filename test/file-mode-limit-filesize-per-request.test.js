@@ -63,9 +63,7 @@ describe('test/file-mode-limit-filesize-per-request.test.js', () => {
       stream: form,
       dataType: 'json',
     });
-
     assert(res.status === 413);
-    // console.log(res.data);
     assert(res.data.code === 'Request_fileSize_limit');
     assert(res.data.message === 'Reach fileSize limit');
   });

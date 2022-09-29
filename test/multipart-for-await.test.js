@@ -23,12 +23,14 @@ describe('test/multipart-for-await.test.js', () => {
   beforeEach(() => app.mockCsrf());
   afterEach(mock.restore);
 
-  it('should suport for await...of', async () => {
+  it('should suport for-await-of', async () => {
     const form = formstream();
     form.field('foo', 'bar');
     form.field('love', 'egg');
     form.file('file1', path.join(__dirname, 'fixtures/中文名.js'));
     form.file('file2', path.join(__dirname, 'fixtures/testfile.js'));
+    // will ignore empty file
+    form.buffer('file3', Buffer.from(''), '', 'application/octet-stream');
 
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
@@ -45,6 +47,7 @@ describe('test/multipart-for-await.test.js', () => {
     assert(data.files.file1.content.includes('hello'));
     assert(data.files.file2.fileName === 'testfile.js');
     assert(data.files.file2.content.includes('this is a test file'));
+    assert(!data.files.file3);
   });
 
   it('should auto consumed file stream on error throw', async () => {
@@ -72,6 +75,24 @@ describe('test/multipart-for-await.test.js', () => {
       form.file('file2', path.join(__dirname, 'fixtures/bigfile.js'));
 
       const res = await urllib.request(host + '/upload', {
+        method: 'POST',
+        headers: form.headers(),
+        stream: form,
+        dataType: 'json',
+      });
+
+      const { data, status } = res;
+      assert(status === 413);
+      assert(data.message === 'Reach fileSize limit');
+    });
+
+    it('limit fileSize very small so limit event is miss', async () => {
+      const form = formstream();
+      form.field('foo', 'bar');
+      form.field('love', 'egg');
+      form.file('file2', path.join(__dirname, 'fixtures/bigfile.js'));
+
+      const res = await urllib.request(host + '/upload?fileSize=10', {
         method: 'POST',
         headers: form.headers(),
         stream: form,

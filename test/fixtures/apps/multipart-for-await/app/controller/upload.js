@@ -8,11 +8,12 @@ const pipeline = util.promisify(stream.pipeline);
 
 module.exports = class UploadController extends Controller {
   async index() {
-    const parts = this.ctx.multipart();
+    const shouldMockError = !!this.ctx.query.mock_error;
+    const fileSize = parseInt(this.ctx.query.fileSize) || this.app.config.multipart.fileSize;
+
+    const parts = this.ctx.multipart({ limits: { fileSize } });
     const fields = {};
     const files = {};
-
-    const shouldMockError = !!this.ctx.query.mock_error;
 
     for await (const part of parts) {
       if (Array.isArray(part)) {
@@ -24,8 +25,9 @@ module.exports = class UploadController extends Controller {
         let content = '';
         await pipeline(part,
           new stream.Writable({
-            write(chunk, encding, callback) {
+            write(chunk, encoding, callback) {
               content += chunk.toString();
+              // console.log('@@', part.filename, part.truncated);
               if (shouldMockError) {
                 return callback(new Error('mock error'));
               }
@@ -33,7 +35,6 @@ module.exports = class UploadController extends Controller {
             },
           }),
         );
-
         files[fieldname] = {
           fileName: filename,
           content,
