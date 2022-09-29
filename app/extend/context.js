@@ -83,11 +83,24 @@ module.exports = {
           // user click `upload` before choose a file, `part` will be file stream, but `part.filename` is empty must handler this, such as log error.
           if (!part.filename) {
             ctx.coreLogger.debug('[egg-multipart] file field `%s` is upload without file stream, will drop it.', part.fieldname);
+
             await pipeline(part, new Writable({
               write(chunk, encding, callback) {
+                console.log('@@ call this?', chunk.toString());
                 setImmediate(callback);
               },
             }));
+
+            // or
+            // for await (const chunk of part) {
+            //   console.log('@@ call this?', chunk.toString());
+            // }
+
+            // or
+            // notify: https://nodejs.org/dist/latest/docs/api/stream.html#readableresume
+            // The resume() has no effect if there is a 'readable' event listening.
+            // part.resume();
+
             continue;
           }
           // TODO: check whether filename is malicious input
