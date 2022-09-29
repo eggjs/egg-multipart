@@ -1,4 +1,14 @@
 
+3.2.0 / 2022-09-29
+==================
+
+**features**
+  * [[`b007d99`](http://github.com/eggjs/egg-multipart/commit/b007d9938939e93732cdee168987c02cf6458e86)] - feat: use PassThrough instead of Writable (#60) (TZ | 天猪 <<atian25@qq.com>>)
+  * [[`ca9efc1`](http://github.com/eggjs/egg-multipart/commit/ca9efc1d3faeb332b48de8320a6b9df31936bb42)] - feat: support `for await...of` (#57) (TZ | 天猪 <<atian25@qq.com>>)
+
+**others**
+  * [[`e9bba31`](http://github.com/eggjs/egg-multipart/commit/e9bba31d051cd14d0ad02c3d5297991f82d6fa1c)] - refactor: saveRequestFiles with for-await-for (#58) (TZ | 天猪 <<atian25@qq.com>>)
+
 3.1.0 / 2022-09-27
 ==================
 
