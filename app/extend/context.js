@@ -9,7 +9,7 @@ const { createWriteStream } = require('fs');
 const bytes = require('humanize-bytes');
 const dayjs = require('dayjs');
 const stream = require('stream');
-const { Readable, Writable } = stream;
+const { Readable, PassThrough } = stream;
 const util = require('util');
 const pipeline = util.promisify(stream.pipeline);
 
@@ -33,7 +33,7 @@ module.exports = {
    *  - {String} options.defaultParamCharset
    *  - {Object} options.limits
    *  - {Function} options.checkFile
-   * @return {Yieldable} parts
+   * @return {Yieldable | AsyncIterable<Yieldable>} parts
    */
   multipart(options) {
     const ctx = this;
@@ -83,11 +83,7 @@ module.exports = {
           // user click `upload` before choose a file, `part` will be file stream, but `part.filename` is empty must handler this, such as log error.
           if (!part.filename) {
             ctx.coreLogger.debug('[egg-multipart] file field `%s` is upload without file stream, will drop it.', part.fieldname);
-            await pipeline(part, new Writable({
-              write(chunk, encding, callback) {
-                setImmediate(callback);
-              },
-            }));
+            await pipeline(part, new PassThrough());
             continue;
           }
           // TODO: check whether filename is malicious input
@@ -95,14 +91,11 @@ module.exports = {
           // busboy only set truncated when consume the stream
           if (part.truncated) {
             // in case of emit 'limit' too fast
-            ctx.coreLogger.debug('[egg-multipart] file `%s` reach filesize limit.', part.filename);
             throw new LimitError('Request_fileSize_limit', 'Reach fileSize limit');
           } else {
-            // eslint-disable-next-line no-loop-func
             part.once('limit', function() {
-              ctx.coreLogger.debug('[egg-multipart] file `%s` reach filesize limit.', part.filename);
               this.emit('error', new LimitError('Request_fileSize_limit', 'Reach fileSize limit'));
-              // this.resume();
+              this.resume();
             });
           }
         }
