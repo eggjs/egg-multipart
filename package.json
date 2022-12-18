@@ -12,8 +12,8 @@
   "scripts": {
     "lint": "eslint .",
     "test": "npm run lint -- --fix && npm run test-local",
-    "test-local": "egg-bin test",
-    "cov": "egg-bin cov",
+    "test-local": "egg-bin test --full-trace",
+    "cov": "egg-bin cov --full-trace",
     "ci": "npm run lint && npm run cov"
   },
   "repository": {
@@ -62,6 +62,6 @@
     "formstream": "^1.1.1",
     "is-type-of": "^1.2.1",
     "typescript": "^4.8.3",
-    "urllib": "^3.9.0"
+    "urllib": "^2.40.0"
   }
 }
