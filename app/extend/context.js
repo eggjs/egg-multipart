@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const path = require('path');
-const uuid = require('uuid');
+const { randomUUID } = require('crypto');
 const parse = require('co-busboy');
 const fs = require('fs').promises;
 const { createWriteStream } = require('fs');
@@ -153,7 +153,7 @@ module.exports = {
           }
 
           // write to tmp file
-          const filepath = path.join(storedir, uuid.v4() + path.extname(filename));
+          const filepath = path.join(storedir, randomUUID() + path.extname(filename));
           const target = createWriteStream(filepath);
           await pipeline(part, target);
 
