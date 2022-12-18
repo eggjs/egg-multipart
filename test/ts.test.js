@@ -1,11 +1,9 @@
-'use strict';
-
 const assert = require('assert');
 const formstream = require('formstream');
 const urllib = require('urllib');
 const path = require('path');
 const mock = require('egg-mock');
-const fs = require('fs').promises;
+const fs = require('fs/promises');
 const coffee = require('coffee');
 
 describe('test/ts.test.js', () => {

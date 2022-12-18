@@ -8,3 +8,5 @@ test/fixtures/**/run
 .DS_Store
 *-lock.json
 *-lock.yaml
+test/fixtures/apps/ts/tsconfig.tsbuildinfo
+test/fixtures/apps/ts/**/*.d.ts

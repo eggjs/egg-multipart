@@ -1,6 +1,7 @@
 # egg-multipart
 
 [![NPM version][npm-image]][npm-url]
+[![Node.js CI](https://github.com/eggjs/egg-multipart/actions/workflows/nodejs.yml/badge.svg)](https://github.com/eggjs/egg-multipart/actions/workflows/nodejs.yml)
 [![Test coverage][codecov-image]][codecov-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 [![npm download][download-image]][download-url]
@@ -265,6 +266,7 @@ const { Controller } = require('egg');
 const fs = require('fs');
 const stream = require('stream');
 const util = require('util');
+const { randomUUID } = require('crypto');
 const pipeline = util.promisify(stream.pipeline);
 
 module.exports = class UploadController extends Controller {
@@ -293,7 +295,7 @@ module.exports = class UploadController extends Controller {
         // 3. or just consume it with another for await
 
         // WARNING: You should almost never use the origin filename as it could contain malicious input.
-        const targetPath = path.join(os.tmpdir(), uuid.v4() + path.extname(filename));
+        const targetPath = path.join(os.tmpdir(), randomUUID() + path.extname(filename));
         await pipeline(part, createWriteStream(targetPath)); // use `pipeline` not `pipe`
       }
     }
