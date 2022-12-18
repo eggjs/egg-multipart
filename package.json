@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/eggjs/egg-multipart#readme",
   "engines": {
-    "node": ">= 14.0.0"
+    "node": ">= 14.17.0"
   },
   "files": [
     "lib",
