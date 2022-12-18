@@ -1,6 +1,6 @@
 {
   "name": "egg-multipart",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "eggPlugin": {
     "name": "multipart",
     "optionalDependencies": [
