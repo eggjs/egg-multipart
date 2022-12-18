@@ -1,6 +1,7 @@
 # egg-multipart
 
 [![NPM version][npm-image]][npm-url]
+[![Node.js CI](https://github.com/eggjs/egg-multipart/actions/workflows/nodejs.yml/badge.svg)](https://github.com/eggjs/egg-multipart/actions/workflows/nodejs.yml)
 [![Test coverage][codecov-image]][codecov-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 [![npm download][download-image]][download-url]

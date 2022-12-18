@@ -10,13 +10,11 @@
   "description": "multipart plugin for egg",
   "main": "index.js",
   "scripts": {
-    "autod": "autod",
     "lint": "eslint .",
     "test": "npm run lint -- --fix && npm run test-local",
     "test-local": "egg-bin test",
-    "cov": "egg-bin cov --c8-report",
-    "ci": "egg-bin pkgfiles && npm run lint && npm run cov",
-    "pkgfiles": "egg-bin pkgfiles"
+    "cov": "egg-bin cov",
+    "ci": "npm run lint && npm run cov"
   },
   "repository": {
     "type": "git",
@@ -45,12 +43,6 @@
     "index.d.ts"
   ],
   "types": "index.d.ts",
-  "ci": {
-    "version": "14, 16, 18",
-    "license": {
-      "year": 2017
-    }
-  },
   "dependencies": {
     "co-busboy": "^2.0.0",
     "dayjs": "^1.11.5",
@@ -65,7 +57,6 @@
     "coffee": "^5.4.0",
     "egg": "^3.1.0",
     "egg-bin": "^5.2.0",
-    "egg-ci": "^2.1.0",
     "egg-mock": "^4.2.1",
     "eslint": "^8.23.1",
     "eslint-config-egg": "^12",
