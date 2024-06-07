@@ -47,8 +47,7 @@
     "co-busboy": "^2.0.0",
     "dayjs": "^1.11.5",
     "egg-path-matching": "^1.0.1",
-    "humanize-bytes": "^1.0.1",
-    "stream-wormhole": "^1.1.0"
+    "humanize-bytes": "^1.0.1"
   },
   "devDependencies": {
     "@eggjs/tsconfig": "^1.2.0",
@@ -59,9 +58,10 @@
     "egg-mock": "^5.4.0",
     "eslint": "^8.23.1",
     "eslint-config-egg": "^12",
-    "formstream": "^1.1.1",
+    "formstream": "^1.5.1",
     "is-type-of": "^1.2.1",
-    "typescript": "^4.8.3",
-    "urllib": "^2.40.0"
+    "typescript": "5",
+    "urllib": "3",
+    "stream-wormhole": "^2.0.1"
   }
 }

@@ -305,7 +305,6 @@ module.exports = class UploadController extends Controller {
 };
 ```
 
-
 ### Upload One File (DEPRECATED)
 
 You can got upload stream by `ctx.getFileStream*()`.
@@ -322,9 +321,9 @@ Controller which handler `POST /upload`:
 
 ```js
 // app/controller/upload.js
-const path = require('path');
-const sendToWormhole = require('stream-wormhole');
-const Controller = require('egg').Controller;
+const path = require('node:path');
+const { sendToWormhole } = require('stream-wormhole');
+const { Controller } = require('egg');
 
 module.exports = class extends Controller {
   async upload() {

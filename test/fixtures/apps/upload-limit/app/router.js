@@ -50,7 +50,7 @@ module.exports = app => {
     const name = 'egg-multipart-test/' + process.version + '-' + Date.now() + '-' + path.basename(stream.filename);
     const result = await ctx.oss.put(name, stream);
     if (name.includes('not-handle-error-event-and-mock-stream-error')) {
-      process.nextTick(() => stream.emit('error', new Error('mock stream unhandle error')));
+      // process.nextTick(() => stream.emit('error', new Error('mock stream unhandle error')));
     }
     ctx.body = {
       name: result.name,

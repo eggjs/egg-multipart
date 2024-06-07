@@ -1,24 +1,27 @@
-'use strict';
-
-const path = require('path');
+const path = require('node:path');
+const fs = require('node:fs/promises');
 const is = require('is-type-of');
-const fs = require('fs').promises;
-const { createWriteStream } = require('fs');
-const stream = require('stream');
-const util = require('util');
-const pipeline = util.promisify(stream.pipeline);
+
+async function readableToBytes(stream) {
+  const chunks = [];
+  let chunk;
+  let totalLength = 0;
+  for await (chunk of stream) {
+    chunks.push(chunk);
+    totalLength += chunk.length;
+  }
+  return Buffer.concat(chunks, totalLength);
+}
 
 module.exports = app => {
   // mock oss
   app.context.oss = {
     async put(name, stream) {
-      const tmpfile = path.join(app.config.baseDir, 'run', Date.now() + name);
-      await fs.mkdir(path.dirname(tmpfile), { recursive: true });
-      const writeStream = createWriteStream(tmpfile);
-      await pipeline(stream, writeStream);
+      const bytes = await readableToBytes(stream);
       return {
         name,
         url: 'http://mockoss.com/' + name,
+        size: bytes.length,
         res: {
           status: 200,
         },
