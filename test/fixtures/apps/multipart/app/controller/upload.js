@@ -1,8 +1,6 @@
-'use strict';
-
-const path = require('path');
-const fs = require('fs');
-const sendToWormhole = require('stream-wormhole');
+const path = require('node:path');
+const fs = require('node:fs');
+const { sendToWormhole } = require('stream-wormhole');
 
 module.exports = async ctx => {
   const parts = ctx.multipart();

@@ -1,11 +1,9 @@
-'use strict';
-
-const assert = require('assert');
-const Agent = require('http').Agent;
+const assert = require('node:assert');
+const { Agent } = require('node:http');
+const path = require('node:path');
+const fs = require('node:fs/promises');
 const formstream = require('formstream');
 const urllib = require('urllib');
-const path = require('path');
-const fs = require('fs').promises;
 const mock = require('egg-mock');
 
 function sleep(ms) {
@@ -101,7 +99,7 @@ describe('test/multipart.test.js', () => {
         stream: form,
       });
 
-      assert(res.data.toString().includes('ENOENT:'));
+      assert.match(res.data.toString(), /ENOENT:/);
     });
 
     it('should auto consumed file stream on error throw', async () => {
@@ -569,8 +567,7 @@ describe('test/multipart.test.js', () => {
 
     it('should file hit limits fileSize', async () => {
       const form = formstream();
-      form.buffer('file', Buffer.alloc(1024 * 1024 * 100), 'foo.js');
-
+      form.buffer('file', Buffer.from('a'.repeat(1024 * 1024 * 100)), 'foo.js');
       const headers = form.headers();
       const url = host + '/upload/async?fileSize=100000';
       const result = await urllib.request(url, {
@@ -646,7 +643,7 @@ describe('test/multipart.test.js', () => {
       });
 
       const data = res.data;
-      assert(res.status === 413);
+      assert.equal(res.status, 413);
       assert(data.message.includes('Request file too large'));
       const content = await fs.readFile(app.coreLogger.options.file, 'utf-8');
       assert(content.includes('nodejs.MultipartFileTooLargeError: Request file too large'));
@@ -668,11 +665,11 @@ describe('test/multipart.test.js', () => {
       });
 
       const data = res.data;
-      assert(res.status === 200);
+      assert.equal(res.status, 200);
       assert(data.url);
 
-      app.expectLog('nodejs.MultipartFileTooLargeError: Request file too large', 'errorLogger');
-      app.expectLog(/filename: ['"]not-handle-error-event.js['"]/, 'errorLogger');
+      app.expectLog('nodejs.MultipartFileTooLargeError: Request file too large', 'coreLogger');
+      app.expectLog(/filename: ['"]not-handle-error-event.js['"]/, 'coreLogger');
     });
 
     it('should ignore stream next errors after limit event fire', async () => {
@@ -693,8 +690,8 @@ describe('test/multipart.test.js', () => {
       assert(res.status === 200);
       assert(data.url);
 
-      app.expectLog('nodejs.MultipartFileTooLargeError: Request file too large', 'errorLogger');
-      app.expectLog(/filename: ['"]not-handle-error-event-and-mock-stream-error.js['"]/, 'errorLogger');
+      app.expectLog('nodejs.MultipartFileTooLargeError: Request file too large', 'coreLogger');
+      app.expectLog(/filename: ['"]not-handle-error-event-and-mock-stream-error.js['"]/, 'coreLogger');
     });
   });
 });
