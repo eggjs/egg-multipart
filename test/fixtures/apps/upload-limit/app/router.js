@@ -1,16 +1,14 @@
-'use strict';
-
-const path = require('path');
-const fs = require('fs').promises;
-const { createWriteStream } = require('fs');
-const os = require('os');
+const path = require('node:path');
+const fs = require('node:fs/promises');
+const { createWriteStream } = require('node:fs');
+const os = require('node:os');
 
 module.exports = app => {
   // mock oss
   app.context.oss = {
     async put(name, stream) {
       const storefile = path.join(os.tmpdir(), name);
-      fs.mkdir(path.dirname(storefile), { recursive: true });
+      await fs.mkdir(path.dirname(storefile), { recursive: true });
 
       return new Promise((resolve, reject) => {
         const writeStream = createWriteStream(storefile);
