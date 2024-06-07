@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.0](https://github.com/eggjs/egg-multipart/compare/v3.3.0...v3.4.0) (2024-06-07)
+
+
+### Features
+
+* remove unuse "stream-wormhole" deps ([#63](https://github.com/eggjs/egg-multipart/issues/63)) ([f61d60f](https://github.com/eggjs/egg-multipart/commit/f61d60fba2c9290542acabe9f7dca0f201635e61))
+
 ## [3.3.0](https://github.com/eggjs/egg-multipart/compare/v3.2.0...v3.3.0) (2022-12-18)
 
 
