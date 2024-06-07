@@ -18,7 +18,7 @@
 Use [co-busboy](https://github.com/cojs/busboy) to upload file by streaming and
 process it without save to disk(using the `stream` mode).
 
-Just use `ctx.multipart()` to got file stream, then pass to image processing liberary such as `gm` or upload to cloud storage such as `oss`.
+Just use `ctx.multipart()` to got file stream, then pass to image processing module such as `gm` or upload to cloud storage such as `oss`.
 
 ## Whitelist of file extensions
 
@@ -432,4 +432,4 @@ NOTICE: `fileModeMatch` options only work on `stream` mode.
 
 ## License
 
-[MIT](https://github.com/eggjs/egg-multipart/blob/master/LICENSE)
+[MIT](LICENSE)

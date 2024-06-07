@@ -12,8 +12,8 @@
   "scripts": {
     "lint": "eslint .",
     "test": "npm run lint -- --fix && npm run test-local",
-    "test-local": "egg-bin test --full-trace",
-    "cov": "egg-bin cov --full-trace",
+    "test-local": "egg-bin test --ts false",
+    "cov": "egg-bin cov --ts false",
     "ci": "npm run lint && npm run cov"
   },
   "repository": {
@@ -51,10 +51,10 @@
   },
   "devDependencies": {
     "@eggjs/tsconfig": "^1.2.0",
-    "@types/node": "^14.18.29",
+    "@types/node": "^20.14.2",
     "coffee": "^5.4.0",
     "egg": "^3.9.0",
-    "egg-bin": "^5.2.0",
+    "egg-bin": "6",
     "egg-mock": "^5.4.0",
     "eslint": "^8.23.1",
     "eslint-config-egg": "^12",
