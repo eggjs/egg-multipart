@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('assert');
 const formstream = require('formstream');
 const urllib = require('urllib');
@@ -7,13 +5,14 @@ const path = require('path');
 const mock = require('egg-mock');
 const fs = require('fs').promises;
 
-describe('test/stream-mode-with-filematch-glob.test.js', () => {
+describe('test/enable-pathToRegexpModule.test.js', () => {
   let app;
   let server;
   let host;
   before(() => {
     app = mock.app({
-      baseDir: 'apps/fileModeMatch-glob',
+      baseDir: 'apps/fileModeMatch-glob-with-pathToRegexpModule',
+      pathToRegexpModule: require.resolve('path-to-regexp-v8'),
     });
     return app.ready();
   });
@@ -58,7 +57,7 @@ describe('test/stream-mode-with-filematch-glob.test.js', () => {
     assert(data.files[0].filepath.startsWith(app.config.multipart.tmpdir));
 
     assert(data.files[1].field === 'file2');
-    assert(data.files[1].filename === 'stream-mode-with-filematch-glob.test.js');
+    assert(data.files[1].filename === 'enable-pathToRegexpModule.test.js');
     assert(data.files[1].encoding === '7bit');
     assert(data.files[1].mime === 'application/javascript');
     assert(data.files[1].filepath.startsWith(app.config.multipart.tmpdir));
@@ -99,7 +98,7 @@ describe('test/stream-mode-with-filematch-glob.test.js', () => {
     assert(data.files[0].filepath.startsWith(app.config.multipart.tmpdir));
 
     assert(data.files[1].field === 'file2');
-    assert(data.files[1].filename === 'stream-mode-with-filematch-glob.test.js');
+    assert(data.files[1].filename === 'enable-pathToRegexpModule.test.js');
     assert(data.files[1].encoding === '7bit');
     assert(data.files[1].mime === 'application/javascript');
     assert(data.files[1].filepath.startsWith(app.config.multipart.tmpdir));

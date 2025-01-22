@@ -41,6 +41,6 @@ describe('test/dynamic-option.test.js', () => {
     });
 
     assert(res.status === 413);
-    assert(res.data.toString().includes('Request_fileSize_limitError: Reach fileSize limit'));
+    assert.match(res.data.toString(), /Error: Reach fileSize limit/);
   });
 });
