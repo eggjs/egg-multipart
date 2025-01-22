@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.0](https://github.com/eggjs/egg-multipart/compare/v3.4.0...v3.5.0) (2025-01-22)
+
+
+### Features
+
+* support custom pathToRegexpModule ([#66](https://github.com/eggjs/egg-multipart/issues/66)) ([d474eec](https://github.com/eggjs/egg-multipart/commit/d474eecf1f86115bfb9750f1856a4d87ec542109))
+
 ## [3.4.0](https://github.com/eggjs/egg-multipart/compare/v3.3.0...v3.4.0) (2024-06-07)
 
 
