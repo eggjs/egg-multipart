@@ -187,7 +187,7 @@ describe('test/file-mode.test.js', () => {
     });
 
     assert(res.status === 413);
-    assert(res.data.toString().includes('Request_fields_limitError: Reach fields limit'));
+    assert.match(res.data.toString(), /Error: Reach fields limit/);
   });
 
   it('should throw error when request files limit', async () => {
@@ -205,7 +205,7 @@ describe('test/file-mode.test.js', () => {
     });
 
     assert(res.status === 413);
-    assert(res.data.toString().includes('Request_files_limitError: Reach files limit'));
+    assert.match(res.data.toString(), /Error: Reach files limit/);
   });
 
   it('should throw error when request field size limit', async () => {
@@ -220,7 +220,7 @@ describe('test/file-mode.test.js', () => {
     });
 
     assert(res.status === 413);
-    assert(res.data.toString().includes('Request_fieldSize_limitError: Reach fieldSize limit'));
+    assert.match(res.data.toString(), /Error: Reach fieldSize limit/);
   });
 
   // fieldNameSize is TODO on busboy
@@ -237,7 +237,7 @@ describe('test/file-mode.test.js', () => {
     });
 
     assert(res.status === 413);
-    assert(res.data.toString().includes('Request_fieldSize_limitError: Reach fieldSize limit'));
+    assert.match(res.data.toString(), /Error: Reach fieldSize limit/);
   });
 
   it('should throw error when request file size limit', async () => {
@@ -256,7 +256,7 @@ describe('test/file-mode.test.js', () => {
     });
 
     assert(res.status === 413);
-    assert(res.data.toString().includes('Request_fileSize_limitError: Reach fileSize limit'));
+    assert.match(res.data.toString(), /Error: Reach fileSize limit/);
   });
 
   it('should throw error when file name invalid', async () => {

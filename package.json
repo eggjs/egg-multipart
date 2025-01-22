@@ -46,7 +46,7 @@
   "dependencies": {
     "co-busboy": "^2.0.0",
     "dayjs": "^1.11.5",
-    "egg-path-matching": "^1.0.1",
+    "egg-path-matching": "^1.2.0",
     "humanize-bytes": "^1.0.1"
   },
   "devDependencies": {
@@ -62,6 +62,7 @@
     "is-type-of": "^1.2.1",
     "typescript": "5",
     "urllib": "3",
-    "stream-wormhole": "^2.0.1"
+    "stream-wormhole": "^2.0.1",
+    "path-to-regexp-v8": "npm:path-to-regexp@8"
   }
 }
