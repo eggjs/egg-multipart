@@ -1,20 +1,22 @@
-'use strict';
+import assert from 'node:assert';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import { scheduler } from 'node:timers/promises';
+import { fileURLToPath } from 'node:url';
+import { mm, mock, MockApplication } from '@eggjs/mock';
+import dayjs from 'dayjs';
+import formstream from 'formstream';
+import urllib from 'urllib';
 
-const assert = require('assert');
-const formstream = require('formstream');
-const urllib = require('urllib');
-const path = require('path');
-const mock = require('egg-mock');
-const fs = require('fs').promises;
-const dayjs = require('dayjs');
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-describe('test/file-mode.test.js', () => {
-  let app;
-  let server;
-  let host;
+describe('test/file-mode.test.ts', () => {
+  let app: MockApplication;
+  let server: any;
+  let host: string;
   before(() => {
-    app = mock.app({
+    app = mm.app({
       baseDir: 'apps/file-mode',
     });
     return app.ready();
@@ -29,7 +31,7 @@ describe('test/file-mode.test.js', () => {
   after(() => app.close());
   after(() => server.close());
   beforeEach(() => app.mockCsrf());
-  afterEach(mock.restore);
+  afterEach(mm.restore);
 
   it('should ignore non multipart request', async () => {
     const res = await app.httpRequest()
@@ -62,7 +64,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 200);
@@ -70,24 +72,24 @@ describe('test/file-mode.test.js', () => {
     assert.deepStrictEqual(data.body, { foo: 'fengmk2', love: 'egg', work: 'with Node.js' });
     assert(data.files.length === 3);
     assert(data.files[0].field === 'file1');
-    assert(data.files[0].filename === 'foooooooo.js');
+    assert.equal(data.files[0].filename, 'foooooooo.js');
     assert(data.files[0].encoding === '7bit');
     assert(data.files[0].mime === 'application/javascript');
     assert(data.files[0].filepath.startsWith(app.config.multipart.tmpdir));
 
     assert(data.files[1].field === 'file2');
     assert(data.files[1].fieldname === 'file2');
-    assert(data.files[1].filename === 'file-mode.test.js');
+    assert.equal(data.files[1].filename, 'file-mode.test.ts');
     assert(data.files[1].encoding === '7bit');
     assert(data.files[1].transferEncoding === '7bit');
-    assert(data.files[1].mime === 'application/javascript');
-    assert(data.files[1].mimeType === 'application/javascript');
+    assert.equal(data.files[1].mime, 'video/mp2t');
+    assert.equal(data.files[1].mimeType, 'video/mp2t');
     assert(data.files[1].filepath.startsWith(app.config.multipart.tmpdir));
 
     assert(data.files[2].field === 'bigfile');
-    assert(data.files[2].filename === 'bigfile.js');
+    assert.equal(data.files[2].filename, 'bigfile.js');
     assert(data.files[2].encoding === '7bit');
-    assert(data.files[2].mime === 'application/javascript');
+    assert.equal(data.files[2].mime, 'application/javascript');
     assert(data.files[2].filepath.startsWith(app.config.multipart.tmpdir));
   });
 
@@ -98,18 +100,18 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
     assert(res.status === 200);
     const data = JSON.parse(res.data);
-    assert(data.files.length === 1);
-    assert(data.files[0].field === 'file');
-    assert(data.files[0].filename === '10mb.js');
-    assert(data.files[0].encoding === '7bit');
-    assert(data.files[0].mime === 'application/octet-stream');
+    assert.equal(data.files.length, 1);
+    assert.equal(data.files[0].field, 'file');
+    assert.equal(data.files[0].filename, '10mb.js');
+    assert.equal(data.files[0].encoding, '7bit');
+    assert.equal(data.files[0].mime, 'application/octet-stream');
     assert(data.files[0].filepath.startsWith(app.config.multipart.tmpdir));
     const stat = await fs.stat(data.files[0].filepath);
-    assert(stat.size === 10 * 1024 * 1024 - 1);
+    assert.equal(stat.size, 10 * 1024 * 1024 - 1);
   });
 
   it('should 200 when field size just 100kb', async () => {
@@ -120,7 +122,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 200);
@@ -138,7 +140,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 200);
@@ -156,7 +158,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 200);
@@ -183,7 +185,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 413);
@@ -201,7 +203,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 413);
@@ -216,7 +218,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 413);
@@ -233,7 +235,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 413);
@@ -252,7 +254,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 413);
@@ -271,7 +273,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 400);
@@ -289,10 +291,10 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload?call_multipart_twice=1', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
-    assert(res.status === 500);
+    assert.equal(res.status, 500);
     assert(res.data.toString().includes('the multipart request can\'t be consumed twice'));
   });
 
@@ -307,7 +309,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload?cleanup=true', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 200);
@@ -326,7 +328,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload?async_cleanup=true', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 200);
@@ -339,15 +341,15 @@ describe('test/file-mode.test.js', () => {
       // [egg-schedule]: register schedule /hello/egg-multipart/app/schedule/clean_tmpdir.js
       const logger = app.loggers.scheduleLogger;
       const content = await fs.readFile(logger.options.file, 'utf8');
-      assert(/\[egg-schedule\]: register schedule .+clean_tmpdir\.js/.test(content));
+      assert.match(content, /\[@eggjs\/schedule\]: register schedule .+clean_tmpdir\.ts/);
     });
 
     it('should remove nothing', async () => {
       app.mockLog();
-      await app.runSchedule(path.join(__dirname, '../app/schedule/clean_tmpdir'));
-      await sleep(1000);
-      app.expectLog('[egg-multipart:CleanTmpdir] start clean tmpdir: "', 'coreLogger');
-      app.expectLog('[egg-multipart:CleanTmpdir] end', 'coreLogger');
+      await app.runSchedule(path.join(__dirname, '../src/app/schedule/clean_tmpdir'));
+      await scheduler.wait(1000);
+      app.expectLog('[@eggjs/multipart:CleanTmpdir] start clean tmpdir: "', 'coreLogger');
+      app.expectLog('[@eggjs/multipart:CleanTmpdir] end', 'coreLogger');
     });
 
     it('should remove old dirs', async () => {
@@ -366,7 +368,7 @@ describe('test/file-mode.test.js', () => {
       const currentMonth = new Date().getMonth();
       const fourMonthBefore = path.join(app.config.multipart.tmpdir, dayjs().subtract(4, 'months').format('YYYY/MM/DD/HH'));
       if (currentMonth < 4) {
-        // if current month is less than April, four months before shoule be last year.
+        // if current month is less than April, four months before should be last year.
         oldDirs.push(fourMonthBefore);
       } else {
         shouldKeepDirs.push(fourMonthBefore);
@@ -380,7 +382,7 @@ describe('test/file-mode.test.js', () => {
       }));
 
       app.mockLog();
-      await app.runSchedule(path.join(__dirname, '../app/schedule/clean_tmpdir'));
+      await app.runSchedule(path.join(__dirname, '../src/app/schedule/clean_tmpdir'));
       for (const dir of oldDirs) {
         const exists = await fs.access(dir).then(() => true).catch(() => false);
         assert(!exists, dir);
@@ -389,8 +391,8 @@ describe('test/file-mode.test.js', () => {
         const exists = await fs.access(dir).then(() => true).catch(() => false);
         assert(exists, dir);
       }
-      app.expectLog('[egg-multipart:CleanTmpdir] removing tmpdir: "', 'coreLogger');
-      app.expectLog('[egg-multipart:CleanTmpdir:success] tmpdir: "', 'coreLogger');
+      app.expectLog('[@eggjs/multipart:CleanTmpdir] removing tmpdir: "', 'coreLogger');
+      app.expectLog('[@eggjs/multipart:CleanTmpdir:success] tmpdir: "', 'coreLogger');
     });
   });
 
@@ -405,7 +407,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
       dataType: 'json',
     });
     assert.deepStrictEqual(res.data.body, { foo: 'egg' });
@@ -423,7 +425,7 @@ describe('test/file-mode.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
       dataType: 'json',
     });
     assert.deepStrictEqual(res.data.body, { foo: [ 'fengmk2', 'like', 'egg' ] });

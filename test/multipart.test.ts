@@ -1,26 +1,22 @@
-const assert = require('node:assert');
-const { Agent } = require('node:http');
-const path = require('node:path');
-const fs = require('node:fs/promises');
-const formstream = require('formstream');
-const urllib = require('urllib');
-const mock = require('egg-mock');
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import assert from 'node:assert';
+import { fileURLToPath } from 'node:url';
+import { scheduler } from 'node:timers/promises';
+import formstream from 'formstream';
+import urllib from 'urllib';
+import { mm, MockApplication } from '@eggjs/mock';
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const agent = new Agent({
-  keepAlive: true,
-});
-
-describe('test/multipart.test.js', () => {
+describe('test/multipart.test.ts', () => {
   describe('multipart', () => {
-    let app;
-    let server;
-    let host;
+    let app: MockApplication;
+    let server: any;
+    let host: string;
     before(async () => {
-      app = mock.app({
+      app = mm.app({
         baseDir: 'apps/multipart',
       });
       await app.ready();
@@ -30,21 +26,21 @@ describe('test/multipart.test.js', () => {
     after(() => app.close());
     after(() => server.close());
     beforeEach(() => app.mockCsrf());
-    afterEach(mock.restore);
+    afterEach(mm.restore);
 
     it('should not has clean_tmpdir schedule', async () => {
       try {
         await app.runSchedule('clean_tmpdir');
         throw new Error('should not run this');
-      } catch (err) {
-        assert(err.message === '[egg-schedule] Cannot find schedule clean_tmpdir');
+      } catch (err: any) {
+        assert.equal(err.message, '[@eggjs/schedule] Cannot find schedule clean_tmpdir');
       }
     });
 
     it('should alway register clean_tmpdir schedule in stream mode', async () => {
       const logger = app.loggers.scheduleLogger;
       const content = await fs.readFile(logger.options.file, 'utf8');
-      assert(/\[egg-schedule\]: register schedule .+clean_tmpdir\.js/.test(content));
+      assert.match(content, /\[@eggjs\/schedule\]: register schedule .+clean_tmpdir\.ts/);
     });
 
     it('should upload with csrf', async () => {
@@ -58,12 +54,12 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
-      assert(res.status === 200);
+      assert.equal(res.status, 200);
       const data = JSON.parse(res.data);
-      assert(data.filename === 'multipart.test.js');
+      assert.equal(data.filename, 'multipart.test.ts');
     });
 
     it('should upload.json with ctoken', async () => {
@@ -77,12 +73,12 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
-      assert(res.status === 200);
+      assert.equal(res.status, 200);
       const data = JSON.parse(res.data);
-      assert(data.filename === 'multipart.test.js');
+      assert.equal(data.filename, 'multipart.test.ts');
     });
 
     it('should handle unread stream and return error response', async () => {
@@ -96,7 +92,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload?mock_stream_error=1', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert.match(res.data.toString(), /ENOENT:/);
@@ -112,15 +108,14 @@ describe('test/multipart.test.js', () => {
         const result = await urllib.request(url, {
           method: 'POST',
           headers,
-          stream: form,
+          stream: form as any,
           dataType: 'json',
-          agent,
         });
 
         assert(result.status === 500);
         const data = result.data;
         assert(data.message === 'part.foo is not a function');
-        await sleep(100);
+        await scheduler.wait(100);
       }
     });
 
@@ -131,7 +126,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 400);
@@ -147,7 +142,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 200);
@@ -164,7 +159,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 200);
@@ -179,7 +174,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 200);
@@ -194,7 +189,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 200);
@@ -209,7 +204,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 200);
@@ -224,7 +219,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 200);
@@ -253,11 +248,11 @@ describe('test/multipart.test.js', () => {
   });
 
   describe('whitelist', () => {
-    let app;
-    let server;
-    let host;
+    let app: MockApplication;
+    let server: any;
+    let host: string;
     before(async () => {
-      app = mock.app({
+      app = mm.app({
         baseDir: 'apps/multipart-with-whitelist',
       });
       await app.ready();
@@ -267,7 +262,7 @@ describe('test/multipart.test.js', () => {
     after(() => app.close());
     after(() => server.close());
     beforeEach(() => app.mockCsrf());
-    afterEach(mock.restore);
+    afterEach(mm.restore);
 
     it('should upload when extname speicified in whitelist', async () => {
       const form = formstream();
@@ -276,7 +271,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 200);
@@ -291,7 +286,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 200);
@@ -307,7 +302,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 400);
@@ -317,11 +312,11 @@ describe('test/multipart.test.js', () => {
   });
 
   describe('whitelist-function', () => {
-    let app;
-    let server;
-    let host;
+    let app: MockApplication;
+    let server: any;
+    let host: string;
     before(async () => {
-      app = mock.app({
+      app = mm.app({
         baseDir: 'apps/whitelist-function',
       });
       await app.ready();
@@ -331,7 +326,7 @@ describe('test/multipart.test.js', () => {
     after(() => app.close());
     after(() => server.close());
     beforeEach(() => app.mockCsrf());
-    afterEach(mock.restore);
+    afterEach(mm.restore);
 
     it('should upload when extname pass whitelist function', async () => {
       const form = formstream();
@@ -340,7 +335,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 200);
@@ -355,7 +350,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 400);
@@ -370,7 +365,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(host + '/upload.json', {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 400);
@@ -380,11 +375,11 @@ describe('test/multipart.test.js', () => {
   });
 
   describe('upload one file', () => {
-    let app;
-    let server;
-    let host;
+    let app: MockApplication;
+    let server: any;
+    let host: string;
     before(async () => {
-      app = mock.app({
+      app = mm.app({
         baseDir: 'apps/upload-one-file',
       });
       await app.ready();
@@ -399,7 +394,7 @@ describe('test/multipart.test.js', () => {
     after(() => app.close());
     after(() => server.close());
     beforeEach(() => app.mockCsrf());
-    afterEach(mock.restore);
+    afterEach(mm.restore);
 
     it('should handle one upload file in simple way', async () => {
       const form = formstream();
@@ -411,7 +406,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(url, {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
         dataType: 'json',
       });
 
@@ -435,7 +430,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(url, {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
         dataType: 'json',
       });
 
@@ -457,7 +452,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(url, {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
         dataType: 'json',
       });
 
@@ -482,7 +477,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(url, {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
         dataType: 'json',
       });
 
@@ -499,7 +494,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(url, {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
 
       assert(res.status === 400);
@@ -516,7 +511,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(url, {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
         dataType: 'json',
       });
 
@@ -537,7 +532,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(url, {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
       });
       assert(res.status === 400);
       assert(res.data.toString().includes('Can\'t found upload file'));
@@ -553,15 +548,14 @@ describe('test/multipart.test.js', () => {
         const result = await urllib.request(url, {
           method: 'POST',
           headers,
-          stream: form,
+          stream: form as any,
           dataType: 'json',
-          agent,
         });
 
         assert(result.status === 500);
         const data = result.data;
         assert(data.message === 'stream.foo is not a function');
-        await sleep(100);
+        await scheduler.wait(100);
       }
     });
 
@@ -573,9 +567,8 @@ describe('test/multipart.test.js', () => {
       const result = await urllib.request(url, {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
         dataType: 'json',
-        agent,
       });
 
       assert(result.status === 413);
@@ -592,9 +585,8 @@ describe('test/multipart.test.js', () => {
       const result = await urllib.request(url, {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
         dataType: 'json',
-        agent,
       });
 
       assert(result.status === 413);
@@ -604,12 +596,12 @@ describe('test/multipart.test.js', () => {
   });
 
   describe('upload over fileSize limit', () => {
-    let app;
-    let server;
-    let host;
+    let app: MockApplication;
+    let server: any;
+    let host: string;
     const bigfile = path.join(__dirname, 'big.js');
     before(async () => {
-      app = mock.app({
+      app = mm.app({
         baseDir: 'apps/upload-limit',
       });
       await app.ready();
@@ -626,7 +618,7 @@ describe('test/multipart.test.js', () => {
       await app.close();
     });
     beforeEach(() => app.mockCsrf());
-    afterEach(mock.restore);
+    afterEach(mm.restore);
 
     it('should show error', async () => {
       const form = formstream();
@@ -638,7 +630,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(url, {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
         dataType: 'json',
       });
 
@@ -660,7 +652,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(url, {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
         dataType: 'json',
       });
 
@@ -682,7 +674,7 @@ describe('test/multipart.test.js', () => {
       const res = await urllib.request(url, {
         method: 'POST',
         headers,
-        stream: form,
+        stream: form as any,
         dataType: 'json',
       });
 

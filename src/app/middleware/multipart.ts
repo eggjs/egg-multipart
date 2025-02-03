@@ -1,6 +1,6 @@
 import { pathMatching } from 'egg-path-matching';
 import type { Context, Next, EggCore } from '@eggjs/core';
-import type { MultipartConfig } from '/src/config/config.default.js';
+import type { MultipartConfig } from '../../config/config.default.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default (options: MultipartConfig, _app: EggCore) => {

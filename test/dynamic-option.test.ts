@@ -1,17 +1,15 @@
-'use strict';
+import { strict as assert } from 'node:assert';
+import fs from 'node:fs/promises';
+import formstream from 'formstream';
+import urllib from 'urllib';
+import { mm, MockApplication } from '@eggjs/mock';
 
-const assert = require('assert');
-const formstream = require('formstream');
-const urllib = require('urllib');
-const mock = require('egg-mock');
-const fs = require('fs').promises;
-
-describe('test/dynamic-option.test.js', () => {
-  let app;
-  let server;
-  let host;
+describe('test/dynamic-option.test.ts', () => {
+  let app: MockApplication;
+  let server: any;
+  let host: string;
   before(() => {
-    app = mock.app({
+    app = mm.app({
       baseDir: 'apps/dynamic-option',
     });
     return app.ready();
@@ -26,7 +24,7 @@ describe('test/dynamic-option.test.js', () => {
   after(() => app.close());
   after(() => server.close());
   beforeEach(() => app.mockCsrf());
-  afterEach(mock.restore);
+  afterEach(() => mm.restore());
 
   it('should work with saveRequestFiles options', async () => {
     const form = formstream();
@@ -36,11 +34,11 @@ describe('test/dynamic-option.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
       // dataType: 'json',
     });
 
-    assert(res.status === 413);
+    assert.equal(res.status, 413);
     assert.match(res.data.toString(), /Error: Reach fileSize limit/);
   });
 });

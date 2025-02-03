@@ -15,7 +15,7 @@ export const whitelist = [
   '.psd',
   // text
   '.svg',
-  '.js', '.jsx',
+  '.js', '.jsx', '.ts', '.tsx',
   '.json',
   '.css', '.less',
   '.html', '.htm',
@@ -27,7 +27,7 @@ export const whitelist = [
   '.mp3',
   '.mp4',
   '.avi',
-] as const;
+];
 
 export function humanizeBytes(size: number | string) {
   if (typeof size === 'number') {
@@ -62,11 +62,15 @@ export function normalizeOptions(options: MultipartConfig) {
   }
 
   function checkExt(fileName: string) {
-    if (typeof options.whitelist === 'function') return options.whitelist(fileName);
+    if (typeof options.whitelist === 'function') {
+      return options.whitelist(fileName);
+    }
     const extname = path.extname(fileName).toLowerCase();
-    if (Array.isArray(options.whitelist)) return options.whitelist.includes(extname);
+    if (Array.isArray(options.whitelist)) {
+      return options.whitelist.includes(extname);
+    }
     // only if user don't provide whitelist, we will use default whitelist + fileExtensions
-    return exports.whitelist.includes(extname) || options.fileExtensions.includes(extname);
+    return whitelist.includes(extname) || options.fileExtensions.includes(extname);
   }
 
   options.checkFile = (_fieldName: string, fileStream: any, fileName: string): void | Error => {
