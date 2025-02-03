@@ -1,24 +1,24 @@
 {
-  "name": "egg-multipart",
+  "name": "@eggjs/multipart",
   "version": "3.5.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "eggPlugin": {
     "name": "multipart",
     "optionalDependencies": [
       "schedule"
-    ]
+    ],
+    "exports": {
+      "import": "./dist/esm",
+      "require": "./dist/commonjs",
+      "typescript": "./src"
+    }
   },
   "description": "multipart plugin for egg",
-  "main": "index.js",
-  "scripts": {
-    "lint": "eslint .",
-    "test": "npm run lint -- --fix && npm run test-local",
-    "test-local": "egg-bin test --ts false",
-    "cov": "egg-bin cov --ts false",
-    "ci": "npm run lint && npm run cov"
-  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eggjs/egg-multipart.git"
+    "url": "git+https://github.com/eggjs/multipart.git"
   },
   "keywords": [
     "egg",
@@ -31,38 +31,73 @@
   "bugs": {
     "url": "https://github.com/eggjs/egg/issues"
   },
-  "homepage": "https://github.com/eggjs/egg-multipart#readme",
+  "homepage": "https://github.com/eggjs/multipart#readme",
   "engines": {
-    "node": ">= 14.17.0"
+    "node": ">= 18.19.0"
   },
-  "files": [
-    "lib",
-    "app",
-    "config",
-    "app.js",
-    "index.d.ts"
-  ],
-  "types": "index.d.ts",
   "dependencies": {
-    "co-busboy": "^2.0.0",
+    "@eggjs/core": "^6.3.1",
+    "bytes": "^3.1.2",
+    "co-busboy": "^2.0.1",
     "dayjs": "^1.11.5",
-    "egg-path-matching": "^1.2.0",
-    "humanize-bytes": "^1.0.1"
+    "egg-path-matching": "^2.1.0"
   },
   "devDependencies": {
-    "@eggjs/tsconfig": "^1.2.0",
-    "@types/node": "^20.14.2",
-    "coffee": "^5.4.0",
-    "egg": "^3.9.0",
-    "egg-bin": "6",
-    "egg-mock": "^5.4.0",
-    "eslint": "^8.23.1",
-    "eslint-config-egg": "^12",
+    "@arethetypeswrong/cli": "^0.17.1",
+    "@eggjs/bin": "7",
+    "@eggjs/mock": "^6.0.5",
+    "@eggjs/tsconfig": "1",
+    "@types/bytes": "^3.1.5",
+    "@types/mocha": "10",
+    "@types/node": "22",
+    "egg": "^4.0.6",
+    "eslint": "8",
+    "eslint-config-egg": "14",
     "formstream": "^1.5.1",
-    "is-type-of": "^1.2.1",
-    "typescript": "5",
-    "urllib": "3",
+    "is-type-of": "2",
+    "path-to-regexp-v8": "npm:path-to-regexp@8",
+    "rimraf": "6",
     "stream-wormhole": "^2.0.1",
-    "path-to-regexp-v8": "npm:path-to-regexp@8"
-  }
+    "tshy": "3",
+    "tshy-after": "1",
+    "typescript": "5",
+    "urllib": "4"
+  },
+  "scripts": {
+    "lint": "eslint --cache src test --ext .ts",
+    "pretest": "npm run clean && npm run lint -- --fix",
+    "test": "egg-bin test",
+    "preci": "npm run clean &&  npm run lint",
+    "ci": "egg-bin cov",
+    "postci": "npm run prepublishOnly && npm run clean",
+    "clean": "rimraf dist",
+    "prepublishOnly": "tshy && tshy-after && attw --pack"
+  },
+  "type": "module",
+  "tshy": {
+    "exports": {
+      ".": "./src/index.ts",
+      "./package.json": "./package.json"
+    }
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/index.d.ts",
+        "default": "./dist/commonjs/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "types": "./dist/commonjs/index.d.ts",
+  "main": "./dist/commonjs/index.js",
+  "module": "./dist/esm/index.js"
 }

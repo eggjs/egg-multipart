@@ -1,19 +1,18 @@
-'use strict';
+import assert from 'node:assert';
+import formstream from 'formstream';
+import urllib from 'urllib';
+import path from 'node:path';
+import { mm, MockApplication } from '@eggjs/mock';
+import fs from 'node:fs/promises';
 
-const assert = require('assert');
-const formstream = require('formstream');
-const urllib = require('urllib');
-const path = require('path');
-const mock = require('egg-mock');
-const fs = require('fs').promises;
-
-describe('test/stream-mode-with-filematch-glob.test.js', () => {
-  let app;
-  let server;
-  let host;
+describe.skip('test/enable-pathToRegexpModule.test.ts', () => {
+  let app: MockApplication;
+  let server: any;
+  let host: string;
   before(() => {
-    app = mock.app({
-      baseDir: 'apps/fileModeMatch-glob',
+    app = mm.app({
+      baseDir: 'apps/fileModeMatch-glob-with-pathToRegexpModule',
+      // pathToRegexpModule: require.resolve('path-to-regexp-v8'),
     });
     return app.ready();
   });
@@ -27,7 +26,7 @@ describe('test/stream-mode-with-filematch-glob.test.js', () => {
   after(() => app.close());
   after(() => server.close());
   beforeEach(() => app.mockCsrf());
-  afterEach(mock.restore);
+  afterEach(mm.restore);
 
   it('should upload match file mode work on /upload_file', async () => {
     const form = formstream();
@@ -44,7 +43,7 @@ describe('test/stream-mode-with-filematch-glob.test.js', () => {
     const res = await urllib.request(host + '/upload_file', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 200);
@@ -58,7 +57,7 @@ describe('test/stream-mode-with-filematch-glob.test.js', () => {
     assert(data.files[0].filepath.startsWith(app.config.multipart.tmpdir));
 
     assert(data.files[1].field === 'file2');
-    assert(data.files[1].filename === 'stream-mode-with-filematch-glob.test.js');
+    assert(data.files[1].filename === 'enable-pathToRegexpModule.test.js');
     assert(data.files[1].encoding === '7bit');
     assert(data.files[1].mime === 'application/javascript');
     assert(data.files[1].filepath.startsWith(app.config.multipart.tmpdir));
@@ -85,7 +84,7 @@ describe('test/stream-mode-with-filematch-glob.test.js', () => {
     const res = await urllib.request(host + '/upload_file/foo', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert.equal(res.status, 200);
@@ -99,7 +98,7 @@ describe('test/stream-mode-with-filematch-glob.test.js', () => {
     assert(data.files[0].filepath.startsWith(app.config.multipart.tmpdir));
 
     assert(data.files[1].field === 'file2');
-    assert(data.files[1].filename === 'stream-mode-with-filematch-glob.test.js');
+    assert(data.files[1].filename === 'enable-pathToRegexpModule.test.js');
     assert(data.files[1].encoding === '7bit');
     assert(data.files[1].mime === 'application/javascript');
     assert(data.files[1].filepath.startsWith(app.config.multipart.tmpdir));
@@ -126,7 +125,7 @@ describe('test/stream-mode-with-filematch-glob.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 200);

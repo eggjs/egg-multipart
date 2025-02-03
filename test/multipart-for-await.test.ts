@@ -1,17 +1,19 @@
-'use strict';
+import assert from 'node:assert';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import formstream from 'formstream';
+import urllib from 'urllib';
+import { mm, MockApplication } from '@eggjs/mock';
 
-const assert = require('assert');
-const formstream = require('formstream');
-const urllib = require('urllib');
-const path = require('path');
-const mock = require('egg-mock');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-describe('test/multipart-for-await.test.js', () => {
-  let app;
-  let server;
-  let host;
+describe('test/multipart-for-await.test.ts', () => {
+  let app: MockApplication;
+  let server: any;
+  let host: string;
   before(async () => {
-    app = mock.app({
+    app = mm.app({
       baseDir: 'apps/multipart-for-await',
     });
     await app.ready();
@@ -21,9 +23,9 @@ describe('test/multipart-for-await.test.js', () => {
   after(() => app.close());
   after(() => server.close());
   beforeEach(() => app.mockCsrf());
-  afterEach(mock.restore);
+  afterEach(mm.restore);
 
-  it('should suport for-await-of', async () => {
+  it('should support for-await-of', async () => {
     const form = formstream();
     form.field('foo', 'bar');
     form.field('love', 'egg');
@@ -35,17 +37,17 @@ describe('test/multipart-for-await.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers: form.headers(),
-      stream: form,
+      stream: form as any,
       dataType: 'json',
     });
 
     const data = res.data;
     // console.log(data);
-    assert(data.fields.foo === 'bar');
-    assert(data.fields.love === 'egg');
-    assert(data.files.file1.fileName === '中文名.js');
+    assert.equal(data.fields.foo, 'bar');
+    assert.equal(data.fields.love, 'egg');
+    assert.equal(data.files.file1.fileName, '中文名.js');
     assert(data.files.file1.content.includes('hello'));
-    assert(data.files.file2.fileName === 'testfile.js');
+    assert.equal(data.files.file2.fileName, 'testfile.js');
     assert(data.files.file2.content.includes('this is a test file'));
     assert(!data.files.file3);
   });
@@ -59,11 +61,11 @@ describe('test/multipart-for-await.test.js', () => {
     const res = await urllib.request(host + '/upload?mock_error=true', {
       method: 'POST',
       headers: form.headers(),
-      stream: form,
+      stream: form as any,
       dataType: 'json',
     });
 
-    assert(res.data.message === 'mock error');
+    assert.equal(res.data.message, 'mock error');
   });
 
   describe('should throw when limit', () => {
@@ -77,13 +79,13 @@ describe('test/multipart-for-await.test.js', () => {
       const res = await urllib.request(host + '/upload', {
         method: 'POST',
         headers: form.headers(),
-        stream: form,
+        stream: form as any,
         dataType: 'json',
       });
 
       const { data, status } = res;
-      assert(status === 413);
-      assert(data.message === 'Reach fileSize limit');
+      assert.equal(status, 413);
+      assert.equal(data.message, 'Reach fileSize limit');
     });
 
     it('limit fileSize very small so limit event is miss', async () => {
@@ -95,13 +97,13 @@ describe('test/multipart-for-await.test.js', () => {
       const res = await urllib.request(host + '/upload?fileSize=10', {
         method: 'POST',
         headers: form.headers(),
-        stream: form,
+        stream: form as any,
         dataType: 'json',
       });
 
       const { data, status } = res;
-      assert(status === 413);
-      assert(data.message === 'Reach fileSize limit');
+      assert.equal(status, 413);
+      assert.equal(data.message, 'Reach fileSize limit');
     });
 
     it('limit fieldSize', async () => {
@@ -114,13 +116,13 @@ describe('test/multipart-for-await.test.js', () => {
       const res = await urllib.request(host + '/upload', {
         method: 'POST',
         headers: form.headers(),
-        stream: form,
+        stream: form as any,
         dataType: 'json',
       });
 
       const { data, status } = res;
-      assert(status === 413);
-      assert(data.message === 'Reach fieldSize limit');
+      assert.equal(status, 413);
+      assert.equal(data.message, 'Reach fieldSize limit');
     });
 
     // TODO: still not support at busboy 1.x (only support at urlencoded)
@@ -136,13 +138,13 @@ describe('test/multipart-for-await.test.js', () => {
       const res = await urllib.request(host + '/upload', {
         method: 'POST',
         headers: form.headers(),
-        stream: form,
+        stream: form as any,
         dataType: 'json',
       });
 
       const { data, status } = res;
-      assert(status === 413);
-      assert(data.message === 'Reach fieldNameSize limit');
+      assert.equal(status, 413);
+      assert.equal(data.message, 'Reach fieldNameSize limit');
     });
   });
 });

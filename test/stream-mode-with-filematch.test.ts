@@ -1,18 +1,20 @@
-'use strict';
+import assert from 'node:assert';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import formstream from 'formstream';
+import urllib from 'urllib';
+import { mm, MockApplication } from '@eggjs/mock';
 
-const assert = require('assert');
-const formstream = require('formstream');
-const urllib = require('urllib');
-const path = require('path');
-const fs = require('fs').promises;
-const mock = require('egg-mock');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-describe('test/stream-mode-with-filematch.test.js', () => {
-  let app;
-  let server;
-  let host;
+describe('test/stream-mode-with-filematch.test.ts', () => {
+  let app: MockApplication;
+  let server: any;
+  let host: string;
   before(() => {
-    app = mock.app({
+    app = mm.app({
       baseDir: 'apps/fileModeMatch',
     });
     return app.ready();
@@ -27,7 +29,7 @@ describe('test/stream-mode-with-filematch.test.js', () => {
   after(() => app.close());
   after(() => server.close());
   beforeEach(() => app.mockCsrf());
-  afterEach(mock.restore);
+  afterEach(mm.restore);
 
   it('should upload match file mode', async () => {
     const form = formstream();
@@ -44,7 +46,7 @@ describe('test/stream-mode-with-filematch.test.js', () => {
     const res = await urllib.request(host + '/upload_file', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 200);
@@ -58,9 +60,9 @@ describe('test/stream-mode-with-filematch.test.js', () => {
     assert(data.files[0].filepath.startsWith(app.config.multipart.tmpdir));
 
     assert(data.files[1].field === 'file2');
-    assert(data.files[1].filename === 'stream-mode-with-filematch.test.js');
+    assert(data.files[1].filename === 'stream-mode-with-filematch.test.ts');
     assert(data.files[1].encoding === '7bit');
-    assert(data.files[1].mime === 'application/javascript');
+    assert(data.files[1].mime === 'video/mp2t');
     assert(data.files[1].filepath.startsWith(app.config.multipart.tmpdir));
 
     assert(data.files[2].field === 'bigfile');
@@ -85,7 +87,7 @@ describe('test/stream-mode-with-filematch.test.js', () => {
     const res = await urllib.request(host + '/upload', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 200);
@@ -108,7 +110,7 @@ describe('test/stream-mode-with-filematch.test.js', () => {
     const res = await urllib.request(host + '/save', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 200);
@@ -122,9 +124,9 @@ describe('test/stream-mode-with-filematch.test.js', () => {
     assert(data.files[0].filepath.startsWith(app.config.multipart.tmpdir));
 
     assert(data.files[1].field === 'file2');
-    assert(data.files[1].filename === 'stream-mode-with-filematch.test.js');
+    assert(data.files[1].filename === 'stream-mode-with-filematch.test.ts');
     assert(data.files[1].encoding === '7bit');
-    assert(data.files[1].mime === 'application/javascript');
+    assert(data.files[1].mime === 'video/mp2t');
     assert(data.files[1].filepath.startsWith(app.config.multipart.tmpdir));
 
     assert(data.files[2].field === 'bigfile');
@@ -150,6 +152,6 @@ describe('test/stream-mode-with-filematch.test.js', () => {
     // [egg-schedule]: register schedule /hello/egg-multipart/app/schedule/clean_tmpdir.js
     const logger = app.loggers.scheduleLogger;
     const content = await fs.readFile(logger.options.file, 'utf8');
-    assert(/\[egg-schedule\]: register schedule .+clean_tmpdir\.js/.test(content));
+    assert.match(content, /\[@eggjs\/schedule\]: register schedule .+clean_tmpdir\.ts/);
   });
 });

@@ -1,17 +1,15 @@
-'use strict';
+import assert from 'node:assert';
+import fs from 'node:fs/promises';
+import formstream from 'formstream';
+import urllib from 'urllib';
+import { mm, MockApplication } from '@eggjs/mock';
 
-const assert = require('assert');
-const formstream = require('formstream');
-const urllib = require('urllib');
-const mock = require('egg-mock');
-const fs = require('fs').promises;
-
-describe('test/file-mode-limit-filesize-per-request.test.js', () => {
-  let app;
-  let server;
-  let host;
+describe('test/file-mode-limit-filesize-per-request.test.ts', () => {
+  let app: MockApplication;
+  let server: any;
+  let host: string;
   before(() => {
-    app = mock.app({
+    app = mm.app({
       baseDir: 'apps/limit-filesize-per-request',
     });
     return app.ready();
@@ -26,7 +24,7 @@ describe('test/file-mode-limit-filesize-per-request.test.js', () => {
   after(() => app.close());
   after(() => server.close());
   beforeEach(() => app.mockCsrf());
-  afterEach(mock.restore);
+  afterEach(mm.restore);
 
   it('should 200 when file size just 1mb on /upload-limit-1mb', async () => {
     const form = formstream();
@@ -36,7 +34,7 @@ describe('test/file-mode-limit-filesize-per-request.test.js', () => {
     const res = await urllib.request(host + '/upload-limit-1mb', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
     });
 
     assert(res.status === 200);
@@ -60,7 +58,7 @@ describe('test/file-mode-limit-filesize-per-request.test.js', () => {
     const res = await urllib.request(host + '/upload-limit-1mb', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
       dataType: 'json',
     });
     assert(res.status === 413);
@@ -76,7 +74,7 @@ describe('test/file-mode-limit-filesize-per-request.test.js', () => {
     const res = await urllib.request(host + '/upload-limit-2mb', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
       dataType: 'json',
     });
 
@@ -101,7 +99,7 @@ describe('test/file-mode-limit-filesize-per-request.test.js', () => {
     const res = await urllib.request(host + '/upload-limit-2mb', {
       method: 'POST',
       headers,
-      stream: form,
+      stream: form as any,
       dataType: 'json',
     });
 
