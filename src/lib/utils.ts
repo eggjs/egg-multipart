@@ -15,7 +15,7 @@ export const whitelist = [
   '.psd',
   // text
   '.svg',
-  '.js', '.jsx', '.ts', '.tsx',
+  '.js', '.jsx',
   '.json',
   '.css', '.less',
   '.html', '.htm',
