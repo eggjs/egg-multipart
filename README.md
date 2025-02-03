@@ -1,19 +1,21 @@
-# egg-multipart
+# @eggjs/multipart
 
 [![NPM version][npm-image]][npm-url]
-[![Node.js CI](https://github.com/eggjs/egg-multipart/actions/workflows/nodejs.yml/badge.svg)](https://github.com/eggjs/egg-multipart/actions/workflows/nodejs.yml)
+[![Node.js CI](https://github.com/eggjs/multipart/actions/workflows/nodejs.yml/badge.svg)](https://github.com/eggjs/multipart/actions/workflows/nodejs.yml)
 [![Test coverage][codecov-image]][codecov-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 [![npm download][download-image]][download-url]
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/eggjs/multipart)
 
-[npm-image]: https://img.shields.io/npm/v/egg-multipart.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/egg-multipart
-[codecov-image]: https://codecov.io/github/eggjs/egg-multipart/coverage.svg?branch=master
-[codecov-url]: https://codecov.io/github/eggjs/egg-multipart?branch=master
-[snyk-image]: https://snyk.io/test/npm/egg-multipart/badge.svg?style=flat-square
-[snyk-url]: https://snyk.io/test/npm/egg-multipart
-[download-image]: https://img.shields.io/npm/dm/egg-multipart.svg?style=flat-square
-[download-url]: https://npmjs.org/package/egg-multipart
+[npm-image]: https://img.shields.io/npm/v/@eggjs/multipart.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/@eggjs/multipart
+[codecov-image]: https://codecov.io/github/eggjs/multipart/coverage.svg?branch=master
+[codecov-url]: https://codecov.io/github/eggjs/multipart?branch=master
+[snyk-image]: https://snyk.io/test/npm/@eggjs/multipart/badge.svg?style=flat-square
+[snyk-url]: https://snyk.io/test/npm/@eggjs/multipart
+[download-image]: https://img.shields.io/npm/dm/@eggjs/multipart.svg?style=flat-square
+[download-url]: https://npmjs.org/package/@eggjs/multipart
 
 Use [co-busboy](https://github.com/cojs/busboy) to upload file by streaming and
 process it without save to disk(using the `stream` mode).
@@ -110,7 +112,8 @@ More examples please follow:
 
 ## `file` mode: the easy way
 
-If you don't know the [Node.js Stream](https://nodejs.org/dist/latest-v10.x/docs/api/stream.html) work, maybe you should use the `file` mode to get started.
+If you don't know the [Node.js Stream](https://nodejs.org/dist/latest-v18.x/docs/api/stream.html) work,
+maybe you should use the `file` mode to get started.
 
 The usage very similar to [bodyParser](https://eggjs.org/en/basics/controller.html#body).
 
@@ -433,3 +436,9 @@ NOTICE: `fileModeMatch` options only work on `stream` mode.
 ## License
 
 [MIT](LICENSE)
+
+## Contributors
+
+[![Contributors](https://contrib.rocks/image?repo=eggjs/multipart)](https://github.com/eggjs/multipart/graphs/contributors)
+
+Made with [contributors-img](https://contrib.rocks).
