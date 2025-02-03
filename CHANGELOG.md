@@ -1,5 +1,48 @@
 # Changelog
 
+## [4.0.0](https://github.com/eggjs/multipart/compare/v3.5.0...v4.0.0) (2025-02-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* drop Node.js < 18.19.0 support
+
+part of https://github.com/eggjs/egg/issues/3644
+
+https://github.com/eggjs/egg/issues/5257
+
+<!-- This is an auto-generated comment: release notes by coderabbit.ai
+-->
+## Summary by CodeRabbit
+
+- **New Features**
+  - Introduced a new middleware for handling multipart requests.
+  - Added improved error handling for oversized file uploads.
+
+- **Refactor**
+- Streamlined configuration and context enhancements for better
+stability and TypeScript support.
+- Modernized the codebase by transitioning to ES modules and updating
+type definitions.
+
+- **Chores**
+- Updated package metadata, dependencies, and continuous integration
+settings to support newer Node.js versions.
+- Introduced a new TypeScript configuration for stricter type-checking.
+
+- **Tests**
+- Added unit tests to validate application behavior under incorrect
+configurations.
+- Established comprehensive tests for multipart form handling to ensure
+correct processing of file uploads.
+- Transitioned existing tests to TypeScript and updated assertions for
+consistency.
+<!-- end of auto-generated comment: release notes by coderabbit.ai -->
+
+### Features
+
+* support cjs and esm both by tshy ([#67](https://github.com/eggjs/multipart/issues/67)) ([ccefb3e](https://github.com/eggjs/multipart/commit/ccefb3ebe89e5a061adb7d8235bd8670a57d7411))
+
 ## [3.5.0](https://github.com/eggjs/egg-multipart/compare/v3.4.0...v3.5.0) (2025-01-22)
 
 
