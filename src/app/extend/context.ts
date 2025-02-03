@@ -1,29 +1,79 @@
-'use strict';
-
-const assert = require('assert');
-const path = require('path');
-const { randomUUID } = require('crypto');
-const parse = require('co-busboy');
-const fs = require('fs').promises;
-const { createWriteStream } = require('fs');
-const bytes = require('humanize-bytes');
-const dayjs = require('dayjs');
-const stream = require('stream');
-const { Readable, PassThrough } = stream;
-const util = require('util');
-const pipeline = util.promisify(stream.pipeline);
-
-class LimitError extends Error {
-  constructor(code, message) {
-    super(message);
-    this.code = code;
-    this.status = 413;
-  }
-}
+import assert from 'node:assert';
+import path from 'node:path';
+import { randomUUID } from 'node:crypto';
+import fs from 'node:fs/promises';
+import { createWriteStream } from 'node:fs';
+import { Readable, PassThrough } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+// @ts-expect-error no types
+import parse from 'co-busboy';
+import dayjs from 'dayjs';
+import { Context } from '@eggjs/core';
+import { humanizeBytes } from '../../lib/utils.js';
+import { LimitError } from '../../lib/LimitError.js';
+import { MultipartFileTooLargeError } from '../../lib/MultipartFileTooLargeError.js';
 
 const HAS_CONSUMED = Symbol('Context#multipartHasConsumed');
 
-module.exports = {
+export interface EggFile {
+  field: string;
+  filename: string;
+  encoding: string;
+  mime: string;
+  filepath: string;
+}
+
+export interface MultipartFileStream extends Readable {
+  fields: Record<string, any>;
+  filename: string;
+  fieldname: string;
+  mime: string;
+  mimeType: string;
+  transferEncoding: string;
+  encoding: string;
+  truncated: boolean;
+}
+
+export interface MultipartOptions {
+  autoFields?: boolean;
+  /**
+   * required file submit, default is true
+   */
+  requireFile?: boolean;
+  /**
+   * default charset encoding
+   */
+  defaultCharset?: string;
+  /**
+   * compatible with defaultCharset
+   * @deprecated use `defaultCharset` instead
+   */
+  defCharset?: string;
+  defaultParamCharset?: string;
+  /**
+   * compatible with defaultParamCharset
+   * @deprecated use `defaultParamCharset` instead
+   */
+  defParamCharset?: string;
+  limits?: {
+    fieldNameSize?: number;
+    fieldSize?: number;
+    fields?: number;
+    fileSize?: number;
+    files?: number;
+    parts?: number;
+    headerPairs?: number;
+  };
+  checkFile?(
+    fieldname: string,
+    file: any,
+    filename: string,
+    encoding: string,
+    mimetype: string
+  ): void | Error;
+}
+
+export default class MultipartContext extends Context {
   /**
    * create multipart.parts instance, to get separated files.
    * @function Context#multipart
@@ -35,7 +85,8 @@ module.exports = {
    *  - {Function} options.checkFile
    * @return {Yieldable | AsyncIterable<Yieldable>} parts
    */
-  multipart(options) {
+  multipart(options: MultipartOptions = {}): AsyncIterable<MultipartFileStream> {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
     // multipart/form-data
     if (!ctx.is('multipart')) ctx.throw(400, 'Content-Type must be multipart/*');
@@ -67,7 +118,7 @@ module.exports = {
     // mount asyncIterator, so we can use `for await` to get parts
     const parts = parse(this, parseOptions);
     parts[Symbol.asyncIterator] = async function* () {
-      let part;
+      let part: MultipartFileStream | undefined;
       do {
         part = await parts();
 
@@ -93,7 +144,7 @@ module.exports = {
             // in case of emit 'limit' too fast
             throw new LimitError('Request_fileSize_limit', 'Reach fileSize limit');
           } else {
-            part.once('limit', function() {
+            part.once('limit', function(this: MultipartFileStream) {
               this.emit('error', new LimitError('Request_fileSize_limit', 'Reach fileSize limit'));
               this.resume();
             });
@@ -106,22 +157,23 @@ module.exports = {
       } while (part !== undefined);
     };
     return parts;
-  },
+  }
 
   /**
    * save request multipart data and files to `ctx.request`
    * @function Context#saveRequestFiles
    * @param {Object} options - { limits, checkFile, ... }
    */
-  async saveRequestFiles(options = {}) {
+  async saveRequestFiles(options: MultipartOptions = {}) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ctx = this;
 
     const allowArrayField = ctx.app.config.multipart.allowArrayField;
 
-    let storedir;
+    let storeDir: string | undefined;
 
-    const requestBody = {};
-    const requestFiles = [];
+    const requestBody: Record<string, any> = {};
+    const requestFiles: EggFile[] = [];
 
     options.autoFields = false;
     const parts = ctx.multipart(options);
@@ -146,14 +198,14 @@ module.exports = {
           // stream
           const { filename, fieldname, encoding, mime } = part;
 
-          if (!storedir) {
+          if (!storeDir) {
             // ${tmpdir}/YYYY/MM/DD/HH
-            storedir = path.join(ctx.app.config.multipart.tmpdir, dayjs().format('YYYY/MM/DD/HH'));
-            await fs.mkdir(storedir, { recursive: true });
+            storeDir = path.join(ctx.app.config.multipart.tmpdir, dayjs().format('YYYY/MM/DD/HH'));
+            await fs.mkdir(storeDir, { recursive: true });
           }
 
           // write to tmp file
-          const filepath = path.join(storedir, randomUUID() + path.extname(filename));
+          const filepath = path.join(storeDir, randomUUID() + path.extname(filename));
           const target = createWriteStream(filepath);
           await pipeline(part, target);
 
@@ -179,7 +231,7 @@ module.exports = {
 
     ctx.request.body = requestBody;
     ctx.request.files = requestFiles;
-  },
+  }
 
   /**
    * get upload file stream
@@ -198,11 +250,12 @@ module.exports = {
    *  - {Function} options.checkFile
    * @return {ReadStream} stream
    * @since 1.0.0
+   * @deprecated Not safe enough, use `ctx.multipart()` instead
    */
-  async getFileStream(options = {}) {
+  async getFileStream(options: MultipartOptions = {}): Promise<MultipartFileStream> {
     options.autoFields = true;
-    const parts = this.multipart(options);
-    let stream = await parts();
+    const parts: any = this.multipart(options);
+    let stream: MultipartFileStream = await parts();
 
     if (options.requireFile !== false) {
       // stream not exists, treat as an exception
@@ -212,7 +265,7 @@ module.exports = {
     }
 
     if (!stream) {
-      stream = Readable.from([]);
+      stream = Readable.from([]) as MultipartFileStream;
     }
 
     if (stream.truncated) {
@@ -221,31 +274,28 @@ module.exports = {
 
     stream.fields = parts.field;
     stream.once('limit', () => {
-      const err = new Error('Request file too large, please check multipart config');
-      err.name = 'MultipartFileTooLargeError';
-      err.status = 413;
-      err.fields = stream.fields;
-      err.filename = stream.filename;
+      const err = new MultipartFileTooLargeError(
+        'Request file too large, please check multipart config', stream.fields, stream.filename);
       if (stream.listenerCount('error') > 0) {
         stream.emit('error', err);
         this.coreLogger.warn(err);
       } else {
         this.coreLogger.error(err);
         // ignore next error event
-        stream.on('error', () => { });
+        stream.on('error', () => {});
       }
       // ignore all data
       stream.resume();
     });
     return stream;
-  },
+  }
 
   /**
    * clean up request tmp files helper
    * @function Context#cleanupRequestFiles
-   * @param {Array<String>} [files] - file paths need to clenup, default is `ctx.request.files`.
+   * @param {Array<String>} [files] - file paths need to cleanup, default is `ctx.request.files`.
    */
-  async cleanupRequestFiles(files) {
+  async cleanupRequestFiles(files?: EggFile[]) {
     if (!files || !files.length) {
       files = this.request.files;
     }
@@ -259,30 +309,60 @@ module.exports = {
         }
       }
     }
-  },
-};
+  }
+}
 
-function extractOptions(options = {}) {
-  const opts = {};
-  if (typeof options.autoFields === 'boolean') opts.autoFields = options.autoFields;
-  if (options.limits) opts.limits = options.limits;
-  if (options.checkFile) opts.checkFile = options.checkFile;
+function extractOptions(options: MultipartOptions = {}) {
+  const opts: MultipartOptions = {};
+  if (typeof options.autoFields === 'boolean') {
+    opts.autoFields = options.autoFields;
+  }
+  if (options.limits) {
+    opts.limits = options.limits;
+  }
+  if (options.checkFile) {
+    opts.checkFile = options.checkFile;
+  }
 
-  if (options.defCharset) opts.defCharset = options.defCharset;
-  if (options.defParamCharset) opts.defParamCharset = options.defParamCharset;
+  if (options.defCharset) {
+    opts.defCharset = options.defCharset;
+  }
+  if (options.defParamCharset) {
+    opts.defParamCharset = options.defParamCharset;
+  }
   // compatible with config names
-  if (options.defaultCharset) opts.defCharset = options.defaultCharset;
-  if (options.defaultParamCharset) opts.defParamCharset = options.defaultParamCharset;
+  if (options.defaultCharset) {
+    opts.defCharset = options.defaultCharset;
+  }
+  if (options.defaultParamCharset) {
+    opts.defParamCharset = options.defaultParamCharset;
+  }
 
   // limits
   if (options.limits) {
-    opts.limits = Object.assign({}, options.limits);
-    for (const key in opts.limits) {
-      if (key.endsWith('Size') && opts.limits[key]) {
-        opts.limits[key] = bytes(opts.limits[key]);
+    const limits: Record<string, number | undefined> = opts.limits = { ...options.limits };
+    for (const key in limits) {
+      if (key.endsWith('Size') && limits[key]) {
+        limits[key] = humanizeBytes(limits[key]);
       }
     }
   }
 
   return opts;
 }
+
+declare module '@eggjs/core' {
+  interface Request {
+    /**
+     * Files Object Array
+     */
+    files?: EggFile[];
+  }
+
+  interface Context {
+    saveRequestFiles(options?: MultipartOptions): Promise<void>;
+    getFileStream(options?: MultipartOptions): Promise<MultipartFileStream>;
+    cleanupRequestFiles(files?: EggFile[]): Promise<void>;
+  }
+}
+

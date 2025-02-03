@@ -10,3 +10,6 @@ test/fixtures/**/run
 *-lock.yaml
 test/fixtures/apps/ts/tsconfig.tsbuildinfo
 test/fixtures/apps/ts/**/*.d.ts
+.tshy*
+.eslintcache
+dist
